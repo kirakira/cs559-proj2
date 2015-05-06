@@ -14,6 +14,7 @@
 int main(int, char**)
 {
 	printf("CS559 Train - Shouhm\n");
+	printf("Welcome to Proj2!");
 
 	TrainWindow tw;
 	tw.show();
