@@ -4,6 +4,8 @@
 // look for TODO: to see things you want to add/change
 // 
 
+#include "GL/glew.h"
+
 #include "TrainView.H"
 #include "TrainWindow.H"
 #include "Train.H"
@@ -14,9 +16,13 @@
 #include <Fl/fl.h>
 
 // we will need OpenGL, and OpenGL needs windows.h
+
 #include <windows.h>
+
+#include "ShaderTools.H"
 #include "GL/gl.h"
 #include "GL/glu.h"
+
 
 #ifdef EXAMPLE_SOLUTION
 #include "TrainExample/TrainExample.H"
@@ -177,6 +183,48 @@ void TrainView::draw()
 		track->setupTrainLight();
 	}
 
+	//Place to compile shader
+	static bool first_time = true;
+	static GLuint basic_program = 0;
+	if (first_time) {
+		char* error;
+		basic_program = loadShader("basic.vert", "basic.frag", error);
+		if (error != NULL) {
+			printf("shader error: %s", error);
+		}
+		first_time = false;
+	}
+
+	GLfloat vertices[] = {
+		0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f
+	};
+
+	GLuint VBO, VAO;
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+	// Bind the Vertex Array Object first, then bind and set vertex buffer(s) and attribute pointer(s).
+	glBindVertexArray(VAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+	// Position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+	// Color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+
+	glBindVertexArray(0); // Unbind VAO
+
+	glUseProgram(basic_program);
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glBindVertexArray(0);
+	glUseProgram(0);
+
 	// now draw the ground plane
 	setupFloor();
 	glDisable(GL_LIGHTING);
@@ -184,7 +232,6 @@ void TrainView::draw()
 	glEnable(GL_LIGHTING);
 	setupObjects();
 
-	
 	// we draw everything twice - once for real, and then once for
 	// shadows
 	drawStuff();

@@ -23,8 +23,5 @@ int main(int, char**)
 	TrainWindow tw;
 	tw.show();
 
-	char* error;
-	GLuint program = loadShader("basic.vert", "basic.frag", error);
-
 	Fl::run();
 }
