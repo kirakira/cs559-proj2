@@ -13,7 +13,7 @@
 
 int main(int, char**)
 {
-	printf("CS559 Train - Shouhm\n");
+	printf("CS559 Train - Shouhm, Wangmh\n");
 	printf("Welcome to Proj2!");
 
 	TrainWindow tw;
