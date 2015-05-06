@@ -8,6 +8,9 @@
 #pragma warning(disable:4311)
 #pragma warning(disable:4204)
 #include <Fl/Fl.h>
+
+#include <GL/glew.h>
+
 #pragma warning(pop)
 
 
