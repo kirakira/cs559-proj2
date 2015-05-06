@@ -103,10 +103,11 @@
     <ClCompile Include="Train.cpp" />
     <ClCompile Include="TrainView.cpp" />
     <ClCompile Include="TrainWindow.cpp" />
+    <ClCompile Include="Utilities\3DUtils.cpp" />
+    <ClCompile Include="Utilities\ArcBallCam.cpp" />
+    <ClCompile Include="Utilities\libtarga.c" />
+    <ClCompile Include="Utilities\Pnt3f.cpp" />
     <ClCompile Include="World.cpp" />
-    <ClCompile Include="..\Utilities\3DUtils.cpp" />
-    <ClCompile Include="..\Utilities\ArcBallCam.cpp" />
-    <ClCompile Include="..\Utilities\Pnt3f.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CallBacks.H" />
@@ -117,10 +118,11 @@
     <ClInclude Include="Train.h" />
     <ClInclude Include="TrainView.H" />
     <ClInclude Include="TrainWindow.H" />
+    <ClInclude Include="Utilities\3DUtils.h" />
+    <ClInclude Include="Utilities\ArcBallCam.H" />
+    <ClInclude Include="Utilities\libtarga.h" />
+    <ClInclude Include="Utilities\Pnt3f.h" />
     <ClInclude Include="World.H" />
-    <ClInclude Include="..\Utilities\3DUtils.h" />
-    <ClInclude Include="..\Utilities\ArcBallCam.H" />
-    <ClInclude Include="..\Utilities\Pnt3f.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
