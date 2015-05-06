@@ -10,6 +10,7 @@
 #include <Fl/Fl.h>
 
 #include <GL/glew.h>
+#include "ShaderTools.H"
 
 #pragma warning(pop)
 
@@ -21,6 +22,9 @@ int main(int, char**)
 
 	TrainWindow tw;
 	tw.show();
+
+	char* error;
+	GLuint program = loadShader("basic.vert", "basic.frag", error);
 
 	Fl::run();
 }
