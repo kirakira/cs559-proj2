@@ -6,7 +6,8 @@
 
 using namespace std;
 
-PatchSurface::PatchSurface(const Pnt3f *control_points, int n, int m)
+PatchSurface::PatchSurface(const Pnt3f *control_points, int n, int m, GLuint shader)
+	: shaderProgram(shader)
 {
 	controlPoints = vector< vector<Pnt3f> >(n, vector<Pnt3f>(m));
 	for (int i = 0; i < n; ++i)
@@ -80,7 +81,9 @@ void PatchSurface::initVertexArray() {
 }
 
 void PatchSurface::draw() const {
+	glUseProgram(shaderProgram);
 	glBindVertexArray(vao);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, renderedVertexCount);
 	glBindVertexArray(0);
+	glUseProgram(0);
 }

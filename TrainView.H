@@ -34,15 +34,21 @@ class Track;
 
 // this uses the old ArcBall Code
 #include "Utilities/ArcBallCam.H"
+#include "PatchSurface.h"
+#include <memory>
 
 // note that this mainly takes care of the drawing and other window
 // stuff
 class TrainView : public Fl_Gl_Window
 {
 	bool glewInitialized;
+	std::unique_ptr<PatchSurface> ground;
+	GLuint groundShaderProgram;
+
 public:
 	// note that we keep the "standard widget" constructor arguments
 	TrainView(int x, int y, int w, int h, const char* l = 0);
+	virtual ~TrainView();
 
 	// overrides of important window things
 	virtual int handle(int);
@@ -53,7 +59,7 @@ public:
 	// we're drawing shadows (no colors, for example)
 	void drawStuff(bool doingShadows=false);
 
-	void drawGround();
+	bool initGround();
 
 	// setup the projection - assuming that the projection stack has been
 	// cleared for you

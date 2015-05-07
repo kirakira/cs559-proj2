@@ -38,6 +38,10 @@ TrainView::TrainView(int x, int y, int w, int h, const char* l) : Fl_Gl_Window(x
 	resetArcball();
 }
 
+TrainView::~TrainView() {
+	glDeleteProgram(groundShaderProgram);
+}
+
 void TrainView::resetArcball()
 {
 	// set up the camera to look at the world
@@ -125,6 +129,8 @@ void TrainView::draw()
 		GLenum err = glewInit();
 		if (GLEW_OK != err)
 			fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+
+		initGround();
 	}
 
 	glViewport(0,0,w(),h());
@@ -194,7 +200,7 @@ void TrainView::draw()
 	// now draw the ground plane
 	setupFloor();
 	glDisable(GL_LIGHTING);
-	drawGround();
+	ground->draw();
 	glEnable(GL_LIGHTING);
 	setupObjects();
 
@@ -211,7 +217,7 @@ void TrainView::draw()
 	
 }
 
-void TrainView::drawGround() {
+bool TrainView::initGround() {
 	Pnt3f controlPoints[] = {
 		{ -150, 0, -150 }, { -150, 0, -100 }, { -150, 0, -50 }, { -150, 0, 0 }, { -150, 0, 50 }, { -150, 0, 100 }, { -150, 0, 150 },
 		{ -100, 0, -150 }, { -100, 0, -100 }, { -100, 20, -50 }, { -100, 0, 0 }, { -100, 0, 50 }, { -100, 0, 100 }, { -100, 0, 150 },
@@ -222,9 +228,14 @@ void TrainView::drawGround() {
 		{ 150, 0, -150 }, { 150, 0, -100 }, { 150, 0, -50 }, { 150, 0, 0 }, { 150, 0, 50 }, { 150, 0, 100 }, { 150, 0, 150 }
 	};
 
-	glColor3f(.2, .7, .2);
-	PatchSurface ps(controlPoints, 7, 7);
-	ps.draw();
+	char *err;
+	groundShaderProgram = loadShader("shaders/ground.vert", "shaders/ground.frag", err);
+	if (groundShaderProgram == 0) {
+		printf(err);
+		return false;
+	}
+	ground = make_unique<PatchSurface>(controlPoints, 7, 7, groundShaderProgram);
+	return true;
 }
 
 // note: this sets up both the Projection and the ModelView matrices
