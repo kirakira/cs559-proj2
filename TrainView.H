@@ -39,6 +39,7 @@ class Track;
 // stuff
 class TrainView : public Fl_Gl_Window
 {
+	bool glewInitialized;
 public:
 	// note that we keep the "standard widget" constructor arguments
 	TrainView(int x, int y, int w, int h, const char* l = 0);
@@ -51,6 +52,8 @@ public:
 	// it has to be encapsulated, since we draw differently if
 	// we're drawing shadows (no colors, for example)
 	void drawStuff(bool doingShadows=false);
+
+	void drawGround();
 
 	// setup the projection - assuming that the projection stack has been
 	// cleared for you

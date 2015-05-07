@@ -113,7 +113,6 @@ void ridCPPcomments(vector<string>& prog)
 GLuint loadShader(const char* vertexFileName, const char* fragmentFileName, char*& error )
 {
 	error = 0;
-	glewInit();
 	// create shader program object and both a vertex and fragment object
 	GLuint	program		= glCreateProgram();
 	GLuint	vertex		= glCreateShader(GL_VERTEX_SHADER_ARB);

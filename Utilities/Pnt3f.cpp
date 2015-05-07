@@ -8,6 +8,9 @@
 #include "Pnt3f.H"
 #include "math.h"
 #include <cstdio>
+#include <vector>
+
+using namespace std;
 
 Pnt3f::Pnt3f() : x(0), y(0), z(0)
 {
@@ -19,6 +22,17 @@ Pnt3f::Pnt3f(const float _x, const float _y, const float _z) : x(_x), y(_y), z(_
 {
 }
 Pnt3f::Pnt3f(const Pnt3f& pt): x(pt.x), y(pt.y), z(pt.z) {
+}
+Pnt3f::Pnt3f(initializer_list<float> l) {
+	vector<float> v;
+	for (auto iter = l.begin(); iter != l.end(); ++iter)
+		v.emplace_back(*iter);
+	if (v.size() > 0)
+		x = v[0];
+	if (v.size() > 1)
+		y = v[1];
+	if (v.size() > 2)
+		z = v[2];
 }
 
 void Pnt3f::normalize()
