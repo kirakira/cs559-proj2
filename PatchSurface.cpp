@@ -2,9 +2,11 @@
 #include "PatchSurface.h"
 #include "CurvePiece.h"
 #include "FL/gl.h"
+#include "glm/glm.hpp"
 #include <cmath>
 
 using namespace std;
+using namespace glm;
 
 PatchSurface::PatchSurface(const Pnt3f *control_points, int n, int m, GLuint shader)
 	: shaderProgram(shader)
@@ -82,8 +84,21 @@ void PatchSurface::initVertexArray() {
 
 void PatchSurface::draw() const {
 	glUseProgram(shaderProgram);
+
+	mat4 projM = mat4(0.0f);
+	mat4 viewM = mat4(0.0f);
+
+	glGetFloatv(GL_PROJECTION_MATRIX, &projM[0][0]);
+	glGetFloatv(GL_MODELVIEW_MATRIX, &viewM[0][0]);
+	GLuint projectID = glGetUniformLocation(shaderProgram, "projectMatrix");
+	GLuint modelViewID = glGetUniformLocation(shaderProgram, "modelViewMatrix");
+
+	glUniformMatrix4fv(projectID, 1, GL_FALSE, &projM[0][0]);
+	glUniformMatrix4fv(modelViewID, 1, GL_FALSE, &viewM[0][0]);
+
 	glBindVertexArray(vao);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, renderedVertexCount);
 	glBindVertexArray(0);
+	
 	glUseProgram(0);
 }
