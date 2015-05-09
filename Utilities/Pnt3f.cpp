@@ -12,6 +12,8 @@
 
 using namespace std;
 
+const float Pnt3f::EPS = 1e-3f;
+
 Pnt3f::Pnt3f() : x(0), y(0), z(0)
 {
 }
@@ -35,21 +37,29 @@ Pnt3f::Pnt3f(initializer_list<float> l) {
 		z = v[2];
 }
 
+float Pnt3f::norm() const {
+	return sqrt(x * x + y * y + z * z);
+}
+
 void Pnt3f::normalize()
 {
-	float l = x*x + y*y + z*z;
-	if (l<.000001) {
+	if (isZero()) {
 		x = 0;
 		y = 1;
 		z = 0;
-	} else {
-		l = sqrt(l);
-		x /= l;
-		y /= l;
-		z /= l;
+	}
+	else {
+		auto n = norm();
+		x /= n;
+		y /= n;
+		z /= n;
 	}
 }
 
 void Pnt3f::print() {
 	printf("(%f, %f, %f) ", x, y, z);
+}
+
+bool Pnt3f::isZero() const {
+	return norm() < EPS;
 }

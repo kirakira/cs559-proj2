@@ -43,6 +43,9 @@ public:
 	Pnt3f operator + (const Pnt3f&) const;	/* create a temp */
 	Pnt3f operator - (const Pnt3f&) const;
 
+	float norm() const;
+	bool isZero() const;
+
 	// make sure that we're unit length - vertical in the error case (0 length)
 	void normalize();
 
@@ -52,6 +55,8 @@ public:
 	float length() const;
 
 	void print();
+
+	static const float EPS;
 };
 
 // inline definitions
@@ -84,4 +89,32 @@ inline Pnt3f Pnt3f::operator*(const Pnt3f& p) const {
 // length
 inline float Pnt3f::length() const {
 	return sqrt(x * x + y * y + z * z);
+}
+
+inline float dot(const Pnt3f &a, const Pnt3f &b) {
+	return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+inline bool feq(float a, float b) {
+	return fabs(a - b) < Pnt3f::EPS;
+}
+
+inline bool flt(float a, float b) {
+	return a < b && !feq(a, b);
+}
+
+inline bool flet(float a, float b) {
+	return a < b || feq(a, b);
+}
+
+inline bool fgt(float a, float b) {
+	return !flet(a, b);
+}
+
+inline bool fget(float a, float b) {
+	return !flt(a, b);
+}
+
+inline bool colinear(const Pnt3f &a, const Pnt3f &b, const Pnt3f &c) {
+	return ((a - b) * (a - c)).isZero();
 }

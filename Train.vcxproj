@@ -99,6 +99,7 @@
     <ClCompile Include="CurvePiece.cpp" />
     <ClCompile Include="EnvItem.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Model.cpp" />
     <ClCompile Include="PatchSurface.cpp" />
     <ClCompile Include="ShaderTools.cpp" />
     <ClCompile Include="Track.cpp" />
@@ -116,6 +117,7 @@
     <ClInclude Include="ControlPoint.H" />
     <ClInclude Include="CurvePiece.h" />
     <ClInclude Include="EnvItem.h" />
+    <ClInclude Include="Model.h" />
     <ClInclude Include="PatchSurface.h" />
     <ClInclude Include="ShaderTools.H" />
     <ClInclude Include="Track.h" />
