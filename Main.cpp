@@ -10,16 +10,18 @@
 #include <Fl/Fl.h>
 
 #include <GL/glew.h>
+#include <FL/glut.h>
 #include "ShaderTools.H"
 
 #pragma warning(pop)
 
 
-int main(int, char**)
+int main(int argc, char** argv)
 {
 	printf("CS559 Train - Shouhm, Wangmh\n");
 	printf("Welcome to Proj2!");
 
+	glutInit(&argc, argv);
 	TrainWindow tw;
 	tw.show();
 

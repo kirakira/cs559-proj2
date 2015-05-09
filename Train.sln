@@ -1,9 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30723.0
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Train", "Train.vcxproj", "{3197BAEE-8FA1-4B01-9979-9EE75C380D6D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4E773C4F-4504-467F-9218-62160579DF5F}"
+	ProjectSection(SolutionItems) = preProject
+		shaders\ground.frag = shaders\ground.frag
+		shaders\ground.vert = shaders\ground.vert
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

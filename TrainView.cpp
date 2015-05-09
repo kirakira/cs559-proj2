@@ -10,6 +10,7 @@
 #include "TrainWindow.H"
 #include "Train.H"
 #include "Track.H"
+#include "PatchSurface.h"
 
 #include "Utilities/3DUtils.H"
 
@@ -30,10 +31,15 @@
 
 
 TrainView::TrainView(int x, int y, int w, int h, const char* l) : Fl_Gl_Window(x,y,w,h,l)
+	, glewInitialized(false)
 {
 	mode( FL_RGB|FL_ALPHA|FL_DOUBLE | FL_STENCIL );
 
 	resetArcball();
+}
+
+TrainView::~TrainView() {
+	glDeleteProgram(groundShaderProgram);
 }
 
 void TrainView::resetArcball()
@@ -118,6 +124,14 @@ int TrainView::handle(int event)
 // it puts a lot of the work into other routines to simplify things
 void TrainView::draw()
 {
+	if (!glewInitialized) {
+		glewInitialized = true;
+		GLenum err = glewInit();
+		if (GLEW_OK != err)
+			fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+
+		initGround();
+	}
 
 	glViewport(0,0,w(),h());
 
@@ -183,52 +197,10 @@ void TrainView::draw()
 		track->setupTrainLight();
 	}
 
-	//Place to compile shader
-	static bool first_time = true;
-	static GLuint basic_program = 0;
-	if (first_time) {
-		char* error;
-		basic_program = loadShader("basic.vert", "basic.frag", error);
-		if (error != NULL) {
-			printf("shader error: %s", error);
-		}
-		first_time = false;
-	}
-
-	GLfloat vertices[] = {
-		50.f, 0.f, 0.0f, 1.f, 0.0f, 0.0f,
-		-50.f, 0.f, 0.0f, 0.0f, 1.f, 0.0f,
-		0.f, 50.f, 0.0f, 0.0f, 0.0f, 1.f
-	};
-
-	GLuint VBO, VAO;
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-	// Bind the Vertex Array Object first, then bind and set vertex buffer(s) and attribute pointer(s).
-	glBindVertexArray(VAO);
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-	// Position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-	glEnableVertexAttribArray(0);
-	// Color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);
-
-	glBindVertexArray(0); // Unbind VAO
-
-	glUseProgram(basic_program);
-		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-		glBindVertexArray(0);
-	glUseProgram(0);
-
 	// now draw the ground plane
 	setupFloor();
 	glDisable(GL_LIGHTING);
-	drawFloor(200,10);
+	ground->draw();
 	glEnable(GL_LIGHTING);
 	setupObjects();
 
@@ -243,6 +215,27 @@ void TrainView::draw()
 		unsetupShadows();
 	}
 	
+}
+
+bool TrainView::initGround() {
+	Pnt3f controlPoints[] = {
+		{ -150, 0, -150 }, { -150, 0, -100 }, { -150, 0, -50 }, { -150, 0, 0 }, { -150, 0, 50 }, { -150, 0, 100 }, { -150, 0, 150 },
+		{ -100, 0, -150 }, { -100, 0, -100 }, { -100, 20, -50 }, { -100, 0, 0 }, { -100, 0, 50 }, { -100, 0, 100 }, { -100, 0, 150 },
+		{ -50, 0, -150 }, { -50, 0, -100 }, { -50, 0, -50 }, { -50, 0, 0 }, { -50, 0, 50 }, { -50, 0, 100 }, { -50, 0, 150 },
+		{ 0, 0, -150 }, { 0, 0, -100 }, { 0, 30, -50 }, { 0, 0, 0 }, { 0, 0, 50 }, { 0, 0, 100 }, { 0, 0, 150 },
+		{ 50, 0, -150 }, { 50, 0, -100 }, { 50, 0, -50 }, { 50, 10, 0 }, { 50, 0, 50 }, { 50, 0, 100 }, { 50, 0, 150 },
+		{ 100, 0, -150 }, { 100, 0, -100 }, { 100, 0, -50 }, { 100, 0, 0 }, { 100, 0, 50 }, { 100, 0, 100 }, { 100, 0, 150 },
+		{ 150, 0, -150 }, { 150, 0, -100 }, { 150, 0, -50 }, { 150, 0, 0 }, { 150, 0, 50 }, { 150, 0, 100 }, { 150, 0, 150 }
+	};
+
+	char *err;
+	groundShaderProgram = loadShader("shaders/ground.vert", "shaders/ground.frag", err);
+	if (groundShaderProgram == 0) {
+		printf(err);
+		return false;
+	}
+	ground = make_unique<PatchSurface>(controlPoints, 7, 7, groundShaderProgram);
+	return true;
 }
 
 // note: this sets up both the Projection and the ModelView matrices

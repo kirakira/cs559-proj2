@@ -16,6 +16,7 @@
 // File assembled by Mike Gleicher, October 2008
 
 #include <cmath>
+#include <initializer_list>
 
 class Pnt3f {
 public:
@@ -34,6 +35,7 @@ public:
 	explicit Pnt3f(const float x,const float y,const float z);	/* say where */
 	Pnt3f(const float*);			/* from an array */
 	// Pnt3f(const Pnt3f&);		/* copy constructor created by default*/
+	Pnt3f(std::initializer_list<float> l);
 
 	// some useful operators - not the complete set, but just some basic ones
 	Pnt3f operator * (const Pnt3f&) const;	/* cross product */
