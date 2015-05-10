@@ -11,6 +11,7 @@
 #include "Train.H"
 #include "Track.H"
 #include "PatchSurface.h"
+#include "Mesh.h"
 
 #include "Utilities/3DUtils.H"
 

@@ -59,7 +59,7 @@ void PatchSurface::initVertexArray() {
 	renderedVertexCount = flatterned.size();
 
 	size_t buffer_size = flatterned.size() * sizeof(float) * 3;
-	float *buffer = new float[buffer_size];
+	float *buffer = new float[buffer_size / sizeof(float)];
 	for (int i = 0; i < (int)flatterned.size(); ++i) {
 		buffer[i * 3] = flatterned[i].x;
 		buffer[i * 3 + 1] = flatterned[i].y;

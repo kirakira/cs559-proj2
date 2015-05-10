@@ -53,3 +53,9 @@ void Pnt3f::normalize()
 void Pnt3f::print() {
 	printf("(%f, %f, %f) ", x, y, z);
 }
+
+void Pnt3f::writeToBuffer(float *buffer) const {
+	buffer[0] = x;
+	buffer[1] = y;
+	buffer[2] = z;
+}

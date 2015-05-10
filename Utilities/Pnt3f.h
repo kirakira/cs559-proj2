@@ -51,6 +51,8 @@ public:
 
 	float length() const;
 
+	void writeToBuffer(float *buffer) const;
+
 	void print();
 };
 

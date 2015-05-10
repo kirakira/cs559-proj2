@@ -1,4 +1,6 @@
+#include "GL/glew.h"
 #include "Mesh.h"
+#include "glm/glm.hpp"
 #include <map>
 #include <cassert>
 #include <algorithm>
@@ -13,6 +15,16 @@ Mesh::Mesh(vector<Pnt3f> v, vector<tuple<int, int, int>> f)
 {
 	for (int i = 0; i < (int)faces.size(); ++i)
 		associateFace(faces[i], i, vertexNeighbours);
+	initVertexArray();
+}
+
+Mesh::~Mesh() {
+	cleanup();
+}
+
+void Mesh::cleanup() {
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
 }
 
 void Mesh::associateFace(const tuple<int, int, int> &face, int index, vector<set<int>> &vertexNeighbours) const {
@@ -79,6 +91,9 @@ void Mesh::modifiedButterfly() {
 
 	faces = std::move(newFaces);
 	vertexNeighbours = std::move(newVertexNeighbours);
+
+	cleanup();
+	initVertexArray();
 }
 
 Pnt3f Mesh::semiregularSubdivideEdge(int regular, int irregular, const vector<vector<int>> &adj) const {
@@ -215,7 +230,50 @@ vector<int> Mesh::adjacentVertices(int v) const {
 	return ans;
 }
 
-void Mesh::draw(GLuint shader) {
+void Mesh::initVertexArray() {
 	int n = faces.size();
-	
+	float *buffer = new float[n * 3 * 3];
+	for (int i = 0; i < n; ++i) {
+		vertices[get<0>(faces[i])].writeToBuffer(buffer + 9 * i);
+		vertices[get<1>(faces[i])].writeToBuffer(buffer + 9 * i + 3);
+		vertices[get<2>(faces[i])].writeToBuffer(buffer + 9 * i + 6);
+	}
+
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, n * 3 * 3 * sizeof(float), buffer, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	delete[] buffer;
+}
+
+void Mesh::draw(GLuint shader) {
+	glUseProgram(shader);
+
+	glm::mat4 projM = glm::mat4(0.0f);
+	glm::mat4 viewM = glm::mat4(0.0f);
+
+	glGetFloatv(GL_PROJECTION_MATRIX, &projM[0][0]);
+	glGetFloatv(GL_MODELVIEW_MATRIX, &viewM[0][0]);
+	GLuint projectID = glGetUniformLocation(shader, "projectMatrix");
+	GLuint modelViewID = glGetUniformLocation(shader, "modelViewMatrix");
+
+	glUniformMatrix4fv(projectID, 1, GL_FALSE, &projM[0][0]);
+	glUniformMatrix4fv(modelViewID, 1, GL_FALSE, &viewM[0][0]);
+
+	glBindVertexArray(vao);
+	glDrawArrays(GL_TRIANGLES, 0, faces.size() * 3);
+	glBindVertexArray(0);
+	glUseProgram(0);
+
+	glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
 }
