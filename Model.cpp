@@ -1,13 +1,27 @@
 #include "Model.h"
 #include <set>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <sstream>
 
 using namespace std;
 
-Model::Model(const string &filename)
-{
+Scalar::Scalar(int variableIndex)
+	: constant(false)
+	, vi(variableIndex) {
+}
+
+Scalar::Scalar(float value)
+	: constant(true)
+	, v(value) {
+}
+
+float Scalar::bind(const vector<float> &variableValues) {
+	if (constant)
+		return v;
+	else
+		return variableValues[vi];
 }
 
 void constructTetrahedron(int base1, int base2, int base3, int top, vector<tuple<int, int, int>> *result) {
@@ -17,7 +31,7 @@ void constructTetrahedron(int base1, int base2, int base3, int top, vector<tuple
 	result->emplace_back(make_tuple(base1, base3, base2));
 }
 
-vector<tuple<int, int, int>> convexHull(const vector<Pnt3f> &points) {
+vector<tuple<int, int, int>> Model::convexHull(const vector<Pnt3f> &points) {
 	int n = (int)points.size();
 	vector<tuple<int, int, int>> ans;
 	set<int> processed;
@@ -63,4 +77,53 @@ vector<tuple<int, int, int>> convexHull(const vector<Pnt3f> &points) {
 	}
 
 	return ans;
+}
+
+vector<string> ModelLoader::load(const string &filename) {
+	vector<string> ans;
+
+	ifstream fin(filename);
+	if (!fin.good())
+		return ans;
+
+	string command;
+	unique_ptr<Model> currentModel;
+	string currentModelName;
+	vector<string> stack;
+	while (fin >> command) {
+		if (command == "name") {
+			currentModel = make_unique<Model>();
+			fin >> currentModelName;
+			if (currentModelName.length() >= 2
+				&& currentModelName[0] == '"'
+				&& currentModelName[currentModelName.length() - 1] == '"')
+				currentModelName = currentModelName.substr(1, currentModelName.length() - 2);
+			stack.clear();
+			continue;
+		}
+		if (!currentModel) {
+			cerr << "Model must have a name" << endl;
+			continue;
+		}
+		else if (command == "begin") {
+			string what;
+			fin >> what;
+			if (what == "scope") {
+				currentModel->beginScope();
+				stack.emplace_back("scope");
+			}
+			else if (what == "convex") {
+
+			}
+		}
+	}
+
+	fin.close();
+}
+
+Model *ModelLoader::getModel(const string &model) const {
+	if (models.count(model) == 0)
+		return nullptr;
+	else
+		return models.at(model).get();
 }
