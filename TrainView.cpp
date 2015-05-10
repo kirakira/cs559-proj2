@@ -11,7 +11,6 @@
 #include "Train.H"
 #include "Track.H"
 #include "PatchSurface.h"
-
 #include "Utilities/3DUtils.H"
 
 #include <Fl/fl.h>
@@ -24,11 +23,11 @@
 #include "GL/gl.h"
 #include "GL/glu.h"
 
+#include "SkyBox.h"
 
 #ifdef EXAMPLE_SOLUTION
 #include "TrainExample/TrainExample.H"
 #endif
-
 
 TrainView::TrainView(int x, int y, int w, int h, const char* l) : Fl_Gl_Window(x,y,w,h,l)
 	, glewInitialized(false)
@@ -131,16 +130,21 @@ void TrainView::draw()
 			fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 
 		initGround();
+		initSkyBox();
 	}
+
+	printf("w = %d\n", w());
 
 	glViewport(0,0,w(),h());
 
 	// clear the window, be sure to clear the Z-Buffer too
-	glClearColor(0,0,.3f,0);		// background should be blue
+	
+	//glClearColor(0,0,.3f,0);		// background should be blue
 	// we need to clear out the stencil buffer since we'll use
 	// it for shadows
 	glClearStencil(0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	
 	glEnable(GL_DEPTH);
 
 	// Blayne prefers GL_DIFFUSE
@@ -157,11 +161,11 @@ void TrainView::draw()
 	// we need to set up the lights AFTER setting up the projection
 
 	// enable the lighting
-	
-	glEnable(GL_COLOR_MATERIAL);
+	//glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_LIGHTING);
+	//glEnable(GL_LIGHTING);
 
+	/*
 	if (!tw->trainLight->value()) {
 		glEnable(GL_LIGHT0);
 		// top view only needs one light
@@ -195,26 +199,20 @@ void TrainView::draw()
 	else {
 		//added for train light
 		track->setupTrainLight();
-	}
+	}*/
 
 	// now draw the ground plane
-	setupFloor();
-	glDisable(GL_LIGHTING);
-	ground->draw();
-	glEnable(GL_LIGHTING);
-	setupObjects();
+	//setupFloor();
+	//glDisable(GL_LIGHTING);
 
+	skybox->draw();
+	ground->draw();
+	//glEnable(GL_LIGHTING);
+	setupObjects();
+	
 	// we draw everything twice - once for real, and then once for
 	// shadows
 	drawStuff();
-
-	// this time drawing is for shadows (except for top view)
-	if (!tw->topCam->value()) {
-		setupShadows();
-		drawStuff(true);
-		unsetupShadows();
-	}
-	
 }
 
 bool TrainView::initGround() {
@@ -235,6 +233,18 @@ bool TrainView::initGround() {
 		return false;
 	}
 	ground = make_unique<PatchSurface>(controlPoints, 7, 7, groundShaderProgram);
+	return true;
+}
+
+bool TrainView::initSkyBox() {
+	
+	char *err;
+	skyBoxProgram = loadShader("shaders/skybox.vert", "shaders/skybox.frag", err);
+	if (skyBoxProgram == 0) {
+		printf(err);
+		return false;
+	}
+	skybox = make_unique<SkyBox>(skyBoxProgram);
 	return true;
 }
 

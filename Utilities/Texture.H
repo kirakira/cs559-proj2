@@ -105,3 +105,7 @@ Texture* fetchTexture(char* name, bool wrapS=false, bool wrapT=false);
 // keep the list of directories to search
 // add a new directory to the list
 extern std::vector<const char*> texturePaths;
+
+//add support for image loader
+void* read_JPG(char *filename, int *width, int *height);
+void* read_PNG(char *filename, int *width, int *height);

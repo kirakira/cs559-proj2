@@ -173,7 +173,7 @@ TrainWindow::TrainWindow(const int x, const int y) : Fl_Double_Window(x,y,900,60
 		togglify(trainLight, 0);
 
 		numCars = new Fl_Counter(700, pty, 40, 20, "Num Cars");
-		numCars->range(1.0f, 10.0f);
+		numCars->range(1.0f, 1.0f);
 		numCars->value(4);
 		numCars->callback((Fl_Callback*)damageCB, this);
 		numCars->step(1.0f);
