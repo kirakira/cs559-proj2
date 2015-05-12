@@ -1,6 +1,7 @@
 #include "RevolutionSurface.h"
 #include "CurvePiece.h"
 #include <glm/gtx/transform.hpp>
+#include <iostream>
 
 using namespace std;
 
@@ -16,7 +17,8 @@ unique_ptr<Mesh> RevolutionSurface::generate(vector<Pnt3f> controlPoints) {
 				controlPoints[i], controlPoints[i + 3], .5);
 			auto p = cp.positionAt(s - i);
 			auto position = glm::vec3(mat * glm::vec4(p.x, p.y, p.z, 1));
-			auto normal = glm::vec3(-position.y, position.x, 0) * cp.tangentAt(s - i).toGLM();
+			auto tan = mat * glm::vec4(cp.tangentAt(s - i).toGLM(), 1);
+			auto normal = glm::cross(glm::vec3(-position.y, position.x, 0), glm::vec3(tan));
 			grid.back().emplace_back(make_pair(position, normal));
 		}
 	}

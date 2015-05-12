@@ -358,10 +358,12 @@ void Mesh::draw(GLuint shader, float time, bool grid) {
 		glDrawArrays(GL_TRIANGLES, 0, faces.size() * 3);
 	}
 
-	glUseProgram(0);
-	glColor3f(0, 0, 0);
-	glBindVertexArray(vao[2]);
-	glDrawArrays(GL_LINES, 0, vertices.size() * 2);
+	if (drawNormals) {
+		glUseProgram(0);
+		glColor3f(0, 0, 0);
+		glBindVertexArray(vao[2]);
+		glDrawArrays(GL_LINES, 0, vertices.size() * 2);
+	}
 
 	glBindVertexArray(0);
 	glUseProgram(0);

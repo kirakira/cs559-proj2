@@ -54,6 +54,8 @@ class Mesh
 	void copy(const Mesh& m);
 	void move(Mesh&& m);
 
+	const bool drawNormals = false;
+
 public:
 	Mesh(std::vector<Vertex> vertices, std::vector<std::tuple<int, int, int>> faces);
 	Mesh(const Mesh &m);
