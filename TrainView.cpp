@@ -12,10 +12,12 @@
 #include "Track.H"
 #include "PatchSurface.h"
 #include "Mesh.h"
+#include "Model.h"
 
 #include "Utilities/3DUtils.H"
 
 #include <Fl/fl.h>
+#include <iostream>
 
 // we will need OpenGL, and OpenGL needs windows.h
 
@@ -125,6 +127,7 @@ int TrainView::handle(int event)
 // it puts a lot of the work into other routines to simplify things
 void TrainView::draw()
 {
+	static unique_ptr<Mesh> model1 = nullptr, model2 = nullptr;
 	if (!glewInitialized) {
 		glewInitialized = true;
 		GLenum err = glewInit();
@@ -132,6 +135,12 @@ void TrainView::draw()
 			fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 
 		initGround();
+		model1 = ModelLoader::load("models/cruise.obj");
+		model2 = make_unique<Mesh>(*model1);
+		if (!model1)
+			cerr << "Failure loading model" << endl;
+		else
+			model2->modifiedButterfly();
 	}
 
 	glViewport(0, 0, w(), h());
@@ -208,6 +217,11 @@ void TrainView::draw()
 	// we draw everything twice - once for real, and then once for
 	// shadows
 	drawStuff();
+	model1->draw(0, true);
+	glPushMatrix();
+	glTranslatef(0, 100, 200);
+	model2->draw(0, true);
+	glPopMatrix();
 
 	/*
 	for (int i = 0; i < 5; ++i) {

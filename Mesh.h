@@ -28,13 +28,14 @@ class Mesh
 	void initVertexArray();
 
 	void copy(const Mesh& m);
+	void move(Mesh&& m);
 
 public:
 	Mesh(std::vector<Pnt3f> vertices, std::vector<std::tuple<int, int, int>> faces);
 	Mesh(const Mesh &m);
 	virtual ~Mesh();
 
-	Mesh &operator=(const Mesh &m);
+	Mesh& operator=(const Mesh &m);
 
 	void modifiedButterfly();
 	void draw(GLuint shader, bool grid);

@@ -22,7 +22,7 @@ Mesh::Mesh(const Mesh& m) {
 	copy(m);
 }
 
-Mesh &Mesh::operator=(const Mesh &m) {
+Mesh& Mesh::operator=(const Mesh &m) {
 	cleanup();
 	copy(m);
 	return *this;
@@ -40,8 +40,10 @@ Mesh::~Mesh() {
 }
 
 void Mesh::cleanup() {
-	glDeleteVertexArrays(2, vao);
-	glDeleteBuffers(2, vbo);
+	if (vao)
+		glDeleteVertexArrays(2, vao);
+	if (vbo)
+		glDeleteBuffers(2, vbo);
 }
 
 void Mesh::associateFace(const tuple<int, int, int> &face, int index, vector<set<int>> &vertexNeighbours) const {
@@ -146,43 +148,48 @@ Pnt3f Mesh::semiregularSubdivideEdge(int regular, int irregular, const vector<ve
 
 Pnt3f Mesh::subdivideEdge(int u, int v, const vector<vector<int>> &adj,
 	const map<pair<int, int>, vector<int>> &commonNeighbours) const {
+
 	if (adj[u].size() == 6 && adj[v].size() == 6) {
 		Pnt3f ans = (1.f / 2 + 1.f / 8) * (vertices[u] + vertices[v]);
 		const auto &n1 = commonNeighbours.at(make_pair(u, v));
-		assert(n1.size() == 2);
+		if (n1.size() != 2)
+			goto out;
 		ans = ans + 1. / 8 * (vertices[n1[0]] + vertices[n1[1]]);
 
 		for (int n : n1) {
 			{
 				const auto &n2 = commonNeighbours.at(make_pair(u, n));
-				assert(n2.size() == 2);
+				if (n2.size() != 2)
+					goto out;
 				for (int i = 0; i < 2; ++i)
 					ans = ans - 1.f / 16 * vertices[n2[i]];
 			}
 
 			{
 				const auto &n2 = commonNeighbours.at(make_pair(v, n));
-				assert(n2.size() == 2);
+				if (n2.size() != 2)
+					goto out;
 				for (int i = 0; i < 2; ++i)
 					ans = ans - 1.f / 16 * vertices[n2[i]];
 			}
 		}
 		return ans;
 	}
-	else if ((adj[u].size() == 6 || adj[v].size() == 6) && min(adj[u].size(), adj[v].size()) >= 3) {
+
+out:
+	if ((adj[u].size() == 6 || adj[v].size() == 6) && min(adj[u].size(), adj[v].size()) >= 3) {
 		if (adj[v].size() == 6)
 			swap(u, v);
 		return semiregularSubdivideEdge(u, v, adj);
 	}
-	else if (adj[u].size() != 6 && adj[v].size() != 6) {
+
+	if (adj[u].size() != 6 && adj[v].size() != 6) {
 		auto a = semiregularSubdivideEdge(u, v, adj),
 			b = semiregularSubdivideEdge(v, u, adj);
 		return .5f * (a + b);
 	}
-	else {
-		cerr << "Butterfly: making up the boundary case" << endl;
-		return .5 * (vertices[u] + vertices[v]);
-	}
+
+	return .5 * (vertices[u] + vertices[v]);
 }
 
 vector<int> Mesh::adjacentVertices(int v) const {
@@ -214,15 +221,18 @@ vector<int> Mesh::adjacentVertices(int v) const {
 	if (neighbours.size() == 0)
 		return ans;
 
-	vector<int> dfs_order;
+	vector<int> ones, twos;
 	for (int n : neighbours) {
 		assert(graph[n].size() >= 1 && graph[n].size() <= 2);
 		if (graph[n].size() == 1)
-			dfs_order.emplace_back(n);
+			ones.emplace_back(n);
+		else
+			twos.emplace_back(n);
 	}
 
-	if (dfs_order.empty())
-		dfs_order.emplace_back(*neighbours.begin());
+	vector<int> dfs_order(std::move(ones));
+	for (auto t : twos)
+		dfs_order.emplace_back(t);
 
 	set<int> visited;
 	for (int v : dfs_order) {
