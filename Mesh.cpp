@@ -41,9 +41,9 @@ Mesh::~Mesh() {
 
 void Mesh::cleanup() {
 	if (vao)
-		glDeleteVertexArrays(2, vao);
+		glDeleteVertexArrays(3, vao);
 	if (vbo)
-		glDeleteBuffers(2, vbo);
+		glDeleteBuffers(3, vbo);
 }
 
 void Mesh::associateFace(const tuple<int, int, int> &face, int index, vector<set<int>> &vertexNeighbours) const {
@@ -261,22 +261,22 @@ void Mesh::initVertexArray() {
 	int n = faces.size();
 	float *buffer = new float[n * 3 * 6];
 	for (int i = 0; i < n; ++i) {
-		vertices[get<0>(faces[i])].writeToBuffer(buffer + 9 * i);
-		vertices[get<1>(faces[i])].writeToBuffer(buffer + 9 * i + 3);
-		vertices[get<2>(faces[i])].writeToBuffer(buffer + 9 * i + 6);
+		vertices[get<0>(faces[i])].writeToBuffer(buffer + 18 * i);
+		vertices[get<1>(faces[i])].writeToBuffer(buffer + 18 * i + 6);
+		vertices[get<2>(faces[i])].writeToBuffer(buffer + 18 * i + 12);
 	}
 
-	glGenVertexArrays(2, vao);
+	glGenVertexArrays(3, vao);
 	glBindVertexArray(vao[0]);
 
-	glGenBuffers(2, vbo);
+	glGenBuffers(3, vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 	glBufferData(GL_ARRAY_BUFFER, n * 3 * 6 * sizeof(float), buffer, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
 	glEnableVertexAttribArray(0);
 
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) sizeof(float));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*) (sizeof(float) * 3));
 	glEnableVertexAttribArray(1);
 
 	glBindVertexArray(0);
@@ -314,6 +314,21 @@ void Mesh::initVertexArray() {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glEnableVertexAttribArray(0);
 
+	vector<Pnt3f> normalPoints;
+	for (const auto &v : vertices) {
+		normalPoints.emplace_back(v.position);
+		auto n = v.normal;
+		if (!n.isZero())
+			n.normalize();
+		normalPoints.emplace_back(v.position + n);
+	}
+
+	glBindVertexArray(vao[2]);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * 3 * sizeof(float) * 2, &normalPoints[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
@@ -342,6 +357,11 @@ void Mesh::draw(GLuint shader, float time, bool grid) {
 		glBindVertexArray(vao[0]);
 		glDrawArrays(GL_TRIANGLES, 0, faces.size() * 3);
 	}
+
+	glUseProgram(0);
+	glColor3f(0, 0, 0);
+	glBindVertexArray(vao[2]);
+	glDrawArrays(GL_LINES, 0, vertices.size() * 2);
 
 	glBindVertexArray(0);
 	glUseProgram(0);

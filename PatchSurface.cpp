@@ -18,8 +18,8 @@ unique_ptr<Mesh> PatchSurface::generate(const Pnt3f *control_points, int n, int 
 	for (int i = 0; i < n; ++i)
 		for (int j = 0; j < m; ++j)
 			controlPoints[i][j].normal =
-				-(controlPoints[min(i + 1, n - 1)][j].normal - controlPoints[max(0, i - 1)][j].normal)
-					* (controlPoints[i][min(j + 1, m - 1)].normal - controlPoints[i][max(0, j - 1)].normal);
+			-(controlPoints[min(i + 1, n - 1)][j].position - controlPoints[max(0, i - 1)][j].position)
+			* (controlPoints[i][min(j + 1, m - 1)].position - controlPoints[i][max(0, j - 1)].position);
 
 	vector<vector<Vertex>> mesh;
 	for (float s = 0; s < n - 3; s += delta) {
@@ -52,12 +52,12 @@ unique_ptr<Mesh> PatchSurface::generate(const Pnt3f *control_points, int n, int 
 
 Vertex PatchSurface::pointAt(const vector<vector<Vertex>> &controlPoints, float s, float t) {
 	int i_start = (int) floor(s), j_start = (int) floor(t);
-	vector<Pnt3f> vp;
+	vector<Vertex> vp;
 	for (int i = i_start; i < i_start + 4; ++i) {
 		CardinalPiece cp(controlPoints[i][j_start + 1], controlPoints[i][j_start + 2],
 			controlPoints[i][j_start], controlPoints[i][j_start + 3], .5);
-		vp.emplace_back(cp.positionAt(t - (int) t));
+		vp.emplace_back(cp.positionAt(t - (int)t), cp.positionAt(t - (int)t, true));
 	}
 	CardinalPiece cp(vp[1], vp[2], vp[0], vp[3], .5);
-	return Vertex(cp.positionAt(s - (int) s), cp.tangentAt(s - (int) s));
+	return Vertex(cp.positionAt(s - (int)s), cp.positionAt(s - (int)s, true));
 }

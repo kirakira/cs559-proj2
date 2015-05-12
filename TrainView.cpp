@@ -227,7 +227,7 @@ bool TrainView::initTower() {
 	{ 0, 6, 80 }, { 0, 10, 85 }, { 0, 0, 100 }, { 0, 0, 120 } });
 	if (!tower)
 		return false;
-	tower->modifiedButterfly();
+	//tower->modifiedButterfly();
 	return true;
 }
 

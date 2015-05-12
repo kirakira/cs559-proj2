@@ -22,7 +22,7 @@ struct Vertex {
 
 	void writeToBuffer(float *buffer) const {
 		position.writeToBuffer(buffer);
-		normal.writeToBuffer(buffer + 3 * sizeof(float));
+		normal.writeToBuffer(buffer + 3);
 	}
 
 	operator ControlPoint() const {
@@ -38,7 +38,7 @@ class Mesh
 	std::vector<std::set<int>> vertexNeighbours; // indices of faces adjacent to a given vertex
 	int sidePointsCount;
 
-	GLuint vao[2], vbo[2];
+	GLuint vao[3], vbo[3];
 
 	void associateFace(const std::tuple<int, int, int> &face, int fi,
 		std::vector<std::set<int>> &vertexNeighbours) const;
