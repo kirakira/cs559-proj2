@@ -1,23 +1,20 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include "Utilities/Pnt3f.h"
+#include "Mesh.h"
 
 class PatchSurface
 {
-	std::vector< std::vector<Pnt3f> > controlPoints;
-	GLuint vao, vbo, shaderProgram;
-	int renderedVertexCount;
-
-	void initVertexArray();
-
-public:
-	PatchSurface(const Pnt3f *control_points, int n, int m, GLuint shader);
-	~PatchSurface();
-
 	// s ranges from [0, n - 3)
 	// t ranges from [0, m - 3)
-	Pnt3f pointAt(float s, float t) const;
+	static Pnt3f pointAt(const std::vector<std::vector<Pnt3f>> &contronPoints,
+		float s, float t);
 
-	void draw() const;
+	PatchSurface() = delete;
+
+public:
+	static std::unique_ptr<Mesh> generate(const Pnt3f *control_points, int n, int m);
+	~PatchSurface() = default;
 };

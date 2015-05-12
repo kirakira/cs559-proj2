@@ -212,7 +212,7 @@ void TrainView::draw()
 	//glDisable(GL_LIGHTING);
 
 	skybox->draw();
-	ground->draw();
+	ground->draw(groundShaderProgram, false);
 	//glEnable(GL_LIGHTING);
 	setupObjects();
 	
@@ -250,7 +250,7 @@ bool TrainView::initGround() {
 		printf(err);
 		return false;
 	}
-	ground = make_unique<PatchSurface>(controlPoints, 7, 7, groundShaderProgram);
+	ground = PatchSurface::generate(controlPoints, 7, 7);
 	return true;
 }
 

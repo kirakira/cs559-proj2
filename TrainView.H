@@ -34,7 +34,6 @@ class Track;
 
 // this uses the old ArcBall Code
 #include "Utilities/ArcBallCam.H"
-#include "PatchSurface.h"
 #include "SkyBox.h"
 #include "Mesh.h"
 #include <memory>
@@ -44,7 +43,7 @@ class Track;
 class TrainView : public Fl_Gl_Window
 {
 	bool glewInitialized;
-	std::unique_ptr<PatchSurface> ground;
+	std::unique_ptr<Mesh> ground;
 	std::unique_ptr<Mesh> tower;
 	GLuint groundShaderProgram;
 	std::unique_ptr<SkyBox> skybox;
