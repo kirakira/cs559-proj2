@@ -127,7 +127,6 @@ int TrainView::handle(int event)
 // it puts a lot of the work into other routines to simplify things
 void TrainView::draw()
 {
-	static unique_ptr<Mesh> model1 = nullptr, model2 = nullptr;
 	if (!glewInitialized) {
 		glewInitialized = true;
 		GLenum err = glewInit();
@@ -135,12 +134,6 @@ void TrainView::draw()
 			fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 
 		initGround();
-		model1 = ModelLoader::load("models/cruise.obj");
-		model2 = make_unique<Mesh>(*model1);
-		if (!model1)
-			cerr << "Failure loading model" << endl;
-		else
-			model2->modifiedButterfly();
 	}
 
 	glViewport(0, 0, w(), h());
@@ -217,22 +210,6 @@ void TrainView::draw()
 	// we draw everything twice - once for real, and then once for
 	// shadows
 	drawStuff();
-	model1->draw(0, true);
-	glPushMatrix();
-	glTranslatef(0, 100, 200);
-	model2->draw(0, true);
-	glPopMatrix();
-
-	/*
-	for (int i = 0; i < 5; ++i) {
-		Mesh mesh({ { 10, (float) 10 + i * 40, 0 },
-			{ 20, (float) 40 + i * 40, 0 }, { 0, (float) 40 + i * 40, -20 },
-			{ 0, (float) 40 + i * 40, 20 } }, { make_tuple(0, 1, 2),
-			make_tuple(0, 1, 3), make_tuple(0, 2, 3), make_tuple(1, 2, 3) });
-		for (int j = 0; j < i; ++j)
-			mesh.modifiedButterfly();
-		mesh.draw(0, true);
-	}*/
 
 	// this time drawing is for shadows (except for top view)
 	if (!tw->topCam->value()) {
