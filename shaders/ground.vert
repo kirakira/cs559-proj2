@@ -3,6 +3,7 @@ layout (location = 0) in vec3 position;
 
 uniform mat4 projectMatrix;
 uniform mat4 modelViewMatrix;
+uniform float time;
 
 out vec3 ourColor;
 

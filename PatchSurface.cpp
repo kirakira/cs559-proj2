@@ -17,9 +17,9 @@ unique_ptr<Mesh> PatchSurface::generate(const Pnt3f *control_points, int n, int 
 			controlPoints[i][j] = control_points[i * m + j];
 
 	vector< vector<Pnt3f> > mesh;
-	for (float s = 0; s < controlPoints.size() - 3; s += delta) {
+	for (float s = 0; s < n - 3; s += delta) {
 		mesh.push_back(vector<Pnt3f>());
-		for (float t = 0; t < controlPoints.size() - 3; t += delta)
+		for (float t = 0; t < m - 3; t += delta)
 			mesh.back().push_back(pointAt(controlPoints, s, t));
 	}
 

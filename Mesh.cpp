@@ -315,7 +315,7 @@ void Mesh::initVertexArray() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void Mesh::draw(GLuint shader, bool grid) {
+void Mesh::draw(GLuint shader, float time, bool grid) {
 	glUseProgram(shader);
 
 	glm::mat4 projM = glm::mat4(0.0f);
@@ -325,9 +325,11 @@ void Mesh::draw(GLuint shader, bool grid) {
 	glGetFloatv(GL_MODELVIEW_MATRIX, &viewM[0][0]);
 	GLuint projectID = glGetUniformLocation(shader, "projectMatrix");
 	GLuint modelViewID = glGetUniformLocation(shader, "modelViewMatrix");
+	GLuint timeID = glGetUniformLocation(shader, "time");
 
 	glUniformMatrix4fv(projectID, 1, GL_FALSE, &projM[0][0]);
 	glUniformMatrix4fv(modelViewID, 1, GL_FALSE, &viewM[0][0]);
+	glUniform1f(timeID, time);
 
 	if (grid) {
 		glBindVertexArray(vao[1]);

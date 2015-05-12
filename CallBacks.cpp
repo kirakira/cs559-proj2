@@ -95,17 +95,17 @@ void backCB(Fl_Widget*, TrainWindow* tw)
 static unsigned long lastRedraw = 0;
 void runButtonCB(TrainWindow* tw)
 {
-	if (tw->runButton->value()) {	// only advance time if appropriate
-		if (clock() - lastRedraw > CLOCKS_PER_SEC/30) {
-			lastRedraw = clock();
+	if (clock() - lastRedraw > CLOCKS_PER_SEC/30) {
+		lastRedraw = clock();			
+		if (tw->runButton->value()) {
 			if (!tw->physics->value()) {
 				tw->advanceTrain();
 			}
 			else {
 				tw->advanceTrain(tw->world.recordDir);
 			}
-			tw->damageMe();
 		}
+		tw->damageMe();
 	}
 }
 

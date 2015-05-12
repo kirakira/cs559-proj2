@@ -137,7 +137,7 @@ void TrainView::draw()
 		initGround();
 		initSkyBox();
 		initTower();
-		initPool();
+		initFlag();
 	}
 
 	printf("w = %d\n", w());
@@ -213,7 +213,7 @@ void TrainView::draw()
 	//glDisable(GL_LIGHTING);
 
 	skybox->draw();
-	ground->draw(groundShaderProgram, false);
+	ground->draw(groundShaderProgram, 0, false);
 	//glEnable(GL_LIGHTING);
 	setupObjects();
 	
@@ -249,15 +249,27 @@ bool TrainView::initGround() {
 	return ground != nullptr;
 }
 
-bool TrainView::initPool() {
+bool TrainView::initFlag() {
+	char *err;
+	poolShaderProgram = loadShader("shaders/pool.vert", "shaders/pool.frag", err);
+	if (poolShaderProgram == 0) {
+		printf(err);
+		return false;
+	}
+
 	vector<Pnt3f> controlPoints;
-	int n = 50;
+	int n = 28, m = 17;
 	for (int i = 0; i < n; ++i)
-		for (int j = 0; j < n; ++j)
+		for (int j = 0; j < m; ++j)
 			controlPoints.emplace_back(i, 0, j);
 
-	pool = PatchSurface::generate(&controlPoints[0], n, n, 1);
-	return pool != nullptr;
+	flag = PatchSurface::generate(&controlPoints[0], n, m, 1);
+	if (!pool)
+		return false;
+
+	controlPoints = { { 0, 1, -100 }, { 0, 1, -45 }, { 0, 1, 20 }, { 0, 1, 40 } };
+	pole = RevolutionSurface::generate(std::move(controlPoints));
+	return pole != nullptr;
 }
 
 bool TrainView::initSkyBox() {
@@ -350,15 +362,16 @@ void TrainView::drawStuff(bool doingShadows)
 	glPushMatrix();
 	glTranslatef(-80, 0, 80);
 	glRotatef(-90, 1, 0, 0);
-	tower->draw(0, true);
+	tower->draw(0, 0, true);
 	glPopMatrix();
 
 	// Pool
 	glPushMatrix();
-	glTranslatef(40, 5, 40);
-	pool->draw(0, true);
+	glTranslatef(40, 50, 40);
+	glRotatef(-90, 1, 0, 0);
+	flag->draw(poolShaderProgram, ((float) GetTickCount()) / 1000., false);
+	pole->draw(0, 0, false);
 	glPopMatrix();
-
 }
 
 // this tries to see which control point is under the mouse

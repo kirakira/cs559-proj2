@@ -38,5 +38,5 @@ public:
 	Mesh& operator=(const Mesh &m);
 
 	void modifiedButterfly();
-	void draw(GLuint shader, bool grid);
+	void draw(GLuint shader, float time, bool grid);
 };
