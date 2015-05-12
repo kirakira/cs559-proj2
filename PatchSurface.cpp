@@ -9,7 +9,7 @@
 using namespace std;
 using namespace glm;
 
-unique_ptr<Mesh> PatchSurface::generate(const Pnt3f *control_points, int n, int m)
+unique_ptr<Mesh> PatchSurface::generate(const Pnt3f *control_points, int n, int m, float delta)
 {
 	auto controlPoints = vector< vector<Pnt3f> >(n, vector<Pnt3f>(m));
 	for (int i = 0; i < n; ++i)
@@ -17,7 +17,6 @@ unique_ptr<Mesh> PatchSurface::generate(const Pnt3f *control_points, int n, int 
 			controlPoints[i][j] = control_points[i * m + j];
 
 	vector< vector<Pnt3f> > mesh;
-	float delta = .1f;
 	for (float s = 0; s < controlPoints.size() - 3; s += delta) {
 		mesh.push_back(vector<Pnt3f>());
 		for (float t = 0; t < controlPoints.size() - 3; t += delta)

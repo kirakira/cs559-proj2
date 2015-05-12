@@ -45,6 +45,7 @@ class TrainView : public Fl_Gl_Window
 	bool glewInitialized;
 	std::unique_ptr<Mesh> ground;
 	std::unique_ptr<Mesh> tower;
+	std::unique_ptr<Mesh> pool;
 	GLuint groundShaderProgram;
 	std::unique_ptr<SkyBox> skybox;
 	GLuint skyBoxProgram;
@@ -67,6 +68,7 @@ public:
 	bool initGround();
 	bool initSkyBox();
 	bool initTower();
+	bool initPool();
 
 	// setup the projection - assuming that the projection stack has been
 	// cleared for you

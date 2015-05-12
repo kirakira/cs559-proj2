@@ -137,6 +137,7 @@ void TrainView::draw()
 		initGround();
 		initSkyBox();
 		initTower();
+		initPool();
 	}
 
 	printf("w = %d\n", w());
@@ -219,12 +220,6 @@ void TrainView::draw()
 	// we draw everything twice - once for real, and then once for
 	// shadows
 	drawStuff();
-
-	glPushMatrix();
-	glTranslatef(-80, 0, 80);
-	glRotatef(-90, 1, 0, 0);
-	tower->draw(0, true);
-	glPopMatrix();
 }
 
 bool TrainView::initTower() {
@@ -250,8 +245,19 @@ bool TrainView::initGround() {
 		printf(err);
 		return false;
 	}
-	ground = PatchSurface::generate(controlPoints, 7, 7);
-	return true;
+	ground = PatchSurface::generate(controlPoints, 7, 7, .1);
+	return ground != nullptr;
+}
+
+bool TrainView::initPool() {
+	vector<Pnt3f> controlPoints;
+	int n = 50;
+	for (int i = 0; i < n; ++i)
+		for (int j = 0; j < n; ++j)
+			controlPoints.emplace_back(i, 0, j);
+
+	pool = PatchSurface::generate(&controlPoints[0], n, n, 1);
+	return pool != nullptr;
 }
 
 bool TrainView::initSkyBox() {
@@ -304,7 +310,6 @@ void TrainView::setProjection()
 // TODO if you have other objects in the world, make sure to draw them
 void TrainView::drawStuff(bool doingShadows)
 {
-
 	// draw the control points
 	// don't draw the control points if you're driving 
 	// (otherwise you get sea-sick as you drive through them)
@@ -339,6 +344,21 @@ void TrainView::drawStuff(bool doingShadows)
 		track->drawTrain(doingShadows);
 
 	tw->world.drawItems(doingShadows);
+
+
+	// Tower
+	glPushMatrix();
+	glTranslatef(-80, 0, 80);
+	glRotatef(-90, 1, 0, 0);
+	tower->draw(0, true);
+	glPopMatrix();
+
+	// Pool
+	glPushMatrix();
+	glTranslatef(40, 5, 40);
+	pool->draw(0, true);
+	glPopMatrix();
+
 }
 
 // this tries to see which control point is under the mouse

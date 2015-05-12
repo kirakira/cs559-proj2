@@ -15,6 +15,6 @@ class PatchSurface
 	PatchSurface() = delete;
 
 public:
-	static std::unique_ptr<Mesh> generate(const Pnt3f *control_points, int n, int m);
+	static std::unique_ptr<Mesh> generate(const Pnt3f *control_points, int n, int m, float delta);
 	~PatchSurface() = default;
 };
