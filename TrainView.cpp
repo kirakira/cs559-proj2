@@ -225,7 +225,10 @@ void TrainView::draw()
 bool TrainView::initTower() {
 	tower = RevolutionSurface::generate({ { 0, 10, -1 }, { 0, 9, 1 },
 	{ 0, 6, 80 }, { 0, 10, 85 }, { 0, 0, 100 }, { 0, 0, 120 } });
-	return tower != nullptr;
+	if (!tower)
+		return false;
+	tower->modifiedButterfly();
+	return true;
 }
 
 bool TrainView::initGround() {
