@@ -18,13 +18,30 @@ Mesh::Mesh(vector<Pnt3f> v, vector<tuple<int, int, int>> f)
 	initVertexArray();
 }
 
+Mesh::Mesh(const Mesh& m) {
+	copy(m);
+}
+
+Mesh &Mesh::operator=(const Mesh &m) {
+	cleanup();
+	copy(m);
+	return *this;
+}
+
+void Mesh::copy(const Mesh &m) {
+	vertices = m.vertices;
+	faces = m.faces;
+	vertexNeighbours = m.vertexNeighbours;
+	initVertexArray();
+}
+
 Mesh::~Mesh() {
 	cleanup();
 }
 
 void Mesh::cleanup() {
-	glDeleteVertexArrays(1, &vao);
-	glDeleteBuffers(1, &vbo);
+	glDeleteVertexArrays(2, vao);
+	glDeleteBuffers(2, vbo);
 }
 
 void Mesh::associateFace(const tuple<int, int, int> &face, int index, vector<set<int>> &vertexNeighbours) const {
@@ -239,11 +256,11 @@ void Mesh::initVertexArray() {
 		vertices[get<2>(faces[i])].writeToBuffer(buffer + 9 * i + 6);
 	}
 
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
+	glGenVertexArrays(2, vao);
+	glBindVertexArray(vao[0]);
 
-	glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glGenBuffers(2, vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
 	glBufferData(GL_ARRAY_BUFFER, n * 3 * 3 * sizeof(float), buffer, GL_STATIC_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -253,9 +270,42 @@ void Mesh::initVertexArray() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	delete[] buffer;
+
+	vector<Pnt3f> sidePoints;
+	set<pair<int, int>> added;
+	for (const auto &f : faces) {
+		int i = get<0>(f), j = get<1>(f), k = get<2>(f);
+		if (added.count(make_pair(min(i, j), max(i, j))) == 0) {
+			sidePoints.emplace_back(vertices[i]);
+			sidePoints.emplace_back(vertices[j]);
+			added.emplace(make_pair(min(i, j), max(i, j)));
+		}
+		if (added.count(make_pair(min(i, k), max(i, k))) == 0) {
+			sidePoints.emplace_back(vertices[i]);
+			sidePoints.emplace_back(vertices[k]);
+			added.emplace(make_pair(min(i, k), max(i, k)));
+		}
+		if (added.count(make_pair(min(k, j), max(k, j))) == 0) {
+			sidePoints.emplace_back(vertices[k]);
+			sidePoints.emplace_back(vertices[j]);
+			added.emplace(make_pair(min(k, j), max(k, j)));
+		}
+	}
+
+	glBindVertexArray(vao[1]);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
+	glBufferData(GL_ARRAY_BUFFER, sidePoints.size() * 3 * sizeof(float), &sidePoints[0], GL_STATIC_DRAW);
+	sidePointsCount = sidePoints.size();
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void Mesh::draw(GLuint shader) {
+void Mesh::draw(GLuint shader, bool grid) {
 	glUseProgram(shader);
 
 	glm::mat4 projM = glm::mat4(0.0f);
@@ -269,11 +319,15 @@ void Mesh::draw(GLuint shader) {
 	glUniformMatrix4fv(projectID, 1, GL_FALSE, &projM[0][0]);
 	glUniformMatrix4fv(modelViewID, 1, GL_FALSE, &viewM[0][0]);
 
-	glBindVertexArray(vao);
-	glDrawArrays(GL_TRIANGLES, 0, faces.size() * 3);
+	if (grid) {
+		glBindVertexArray(vao[1]);
+		glDrawArrays(GL_LINES, 0, sidePointsCount);
+	}
+	else {
+		glBindVertexArray(vao[0]);
+		glDrawArrays(GL_TRIANGLES, 0, faces.size() * 3);
+	}
+
 	glBindVertexArray(0);
 	glUseProgram(0);
-
-	glDeleteVertexArrays(1, &vao);
-	glDeleteBuffers(1, &vbo);
 }

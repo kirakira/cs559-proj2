@@ -12,8 +12,9 @@ class Mesh
 	std::vector<Pnt3f> vertices;
 	std::vector<std::tuple<int, int, int>> faces;
 	std::vector<std::set<int>> vertexNeighbours; // indices of faces adjacent to a given vertex
+	int sidePointsCount;
 
-	GLuint vao, vbo;
+	GLuint vao[2], vbo[2];
 
 	void associateFace(const std::tuple<int, int, int> &face, int fi,
 		std::vector<std::set<int>> &vertexNeighbours) const;
@@ -26,10 +27,15 @@ class Mesh
 	void cleanup();
 	void initVertexArray();
 
+	void copy(const Mesh& m);
+
 public:
 	Mesh(std::vector<Pnt3f> vertices, std::vector<std::tuple<int, int, int>> faces);
+	Mesh(const Mesh &m);
 	virtual ~Mesh();
 
+	Mesh &operator=(const Mesh &m);
+
 	void modifiedButterfly();
-	void draw(GLuint shader);
+	void draw(GLuint shader, bool grid);
 };

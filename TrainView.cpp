@@ -134,10 +134,10 @@ void TrainView::draw()
 		initGround();
 	}
 
-	glViewport(0,0,w(),h());
+	glViewport(0, 0, w(), h());
 
 	// clear the window, be sure to clear the Z-Buffer too
-	glClearColor(0,0,.3f,0);		// background should be blue
+	glClearColor(0, 0, .3f, 0);		// background should be blue
 	// we need to clear out the stencil buffer since we'll use
 	// it for shadows
 	glClearStencil(0);
@@ -145,7 +145,7 @@ void TrainView::draw()
 	glEnable(GL_DEPTH);
 
 	// Blayne prefers GL_DIFFUSE
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
 	// prepare for projection
 	glMatrixMode(GL_PROJECTION);
@@ -158,7 +158,7 @@ void TrainView::draw()
 	// we need to set up the lights AFTER setting up the projection
 
 	// enable the lighting
-	
+
 	glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
@@ -209,13 +209,23 @@ void TrainView::draw()
 	// shadows
 	drawStuff();
 
+	/*
+	for (int i = 0; i < 5; ++i) {
+		Mesh mesh({ { 10, (float) 10 + i * 40, 0 },
+			{ 20, (float) 40 + i * 40, 0 }, { 0, (float) 40 + i * 40, -20 },
+			{ 0, (float) 40 + i * 40, 20 } }, { make_tuple(0, 1, 2),
+			make_tuple(0, 1, 3), make_tuple(0, 2, 3), make_tuple(1, 2, 3) });
+		for (int j = 0; j < i; ++j)
+			mesh.modifiedButterfly();
+		mesh.draw(0, true);
+	}*/
+
 	// this time drawing is for shadows (except for top view)
 	if (!tw->topCam->value()) {
 		setupShadows();
 		drawStuff(true);
 		unsetupShadows();
 	}
-	
 }
 
 bool TrainView::initGround() {
