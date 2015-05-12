@@ -11,9 +11,13 @@
 #include "Train.H"
 #include "Track.H"
 #include "PatchSurface.h"
+#include "Mesh.h"
+#include "Model.h"
+
 #include "Utilities/3DUtils.H"
 
 #include <Fl/fl.h>
+#include <iostream>
 
 // we will need OpenGL, and OpenGL needs windows.h
 
@@ -148,7 +152,7 @@ void TrainView::draw()
 	glEnable(GL_DEPTH);
 
 	// Blayne prefers GL_DIFFUSE
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
 	// prepare for projection
 	glMatrixMode(GL_PROJECTION);

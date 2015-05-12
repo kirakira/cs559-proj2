@@ -17,7 +17,7 @@
 
 
 int main(int argc, char** argv)
-{
+{	
 	printf("CS559 Train - Shouhm, Wangmh\n");
 	printf("Welcome to Proj2!");
 
