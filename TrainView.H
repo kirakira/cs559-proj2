@@ -36,6 +36,7 @@ class Track;
 #include "Utilities/ArcBallCam.H"
 #include "PatchSurface.h"
 #include "SkyBox.h"
+#include "Mesh.h"
 #include <memory>
 
 // note that this mainly takes care of the drawing and other window
@@ -44,6 +45,7 @@ class TrainView : public Fl_Gl_Window
 {
 	bool glewInitialized;
 	std::unique_ptr<PatchSurface> ground;
+	std::unique_ptr<Mesh> tower;
 	GLuint groundShaderProgram;
 	std::unique_ptr<SkyBox> skybox;
 	GLuint skyBoxProgram;
@@ -65,6 +67,7 @@ public:
 	//init shaders for our objects!
 	bool initGround();
 	bool initSkyBox();
+	bool initTower();
 
 	// setup the projection - assuming that the projection stack has been
 	// cleared for you

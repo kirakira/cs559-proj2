@@ -13,6 +13,7 @@
 #include "PatchSurface.h"
 #include "Mesh.h"
 #include "Model.h"
+#include "RevolutionSurface.h"
 
 #include "Utilities/3DUtils.H"
 
@@ -135,6 +136,7 @@ void TrainView::draw()
 
 		initGround();
 		initSkyBox();
+		initTower();
 	}
 
 	printf("w = %d\n", w());
@@ -217,6 +219,18 @@ void TrainView::draw()
 	// we draw everything twice - once for real, and then once for
 	// shadows
 	drawStuff();
+
+	glPushMatrix();
+	glTranslatef(-80, 0, 80);
+	glRotatef(-90, 1, 0, 0);
+	tower->draw(0, true);
+	glPopMatrix();
+}
+
+bool TrainView::initTower() {
+	tower = RevolutionSurface::generate({ { 0, 10, -1 }, { 0, 9, 1 },
+	{ 0, 6, 80 }, { 0, 10, 85 }, { 0, 0, 100 }, { 0, 0, 120 } });
+	return tower != nullptr;
 }
 
 bool TrainView::initGround() {
