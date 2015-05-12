@@ -64,5 +64,5 @@ public:
 	Mesh& operator=(const Mesh &m);
 
 	void modifiedButterfly();
-	void draw(GLuint shader, float time, bool grid);
+	void draw(GLuint shader, float time, const Pnt3f &light, const std::vector<Pnt3f> &localLights, bool grid);
 };

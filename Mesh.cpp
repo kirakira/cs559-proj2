@@ -333,7 +333,7 @@ void Mesh::initVertexArray() {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void Mesh::draw(GLuint shader, float time, bool grid) {
+void Mesh::draw(GLuint shader, float time, const Pnt3f &light, const vector<Pnt3f> &localLights, bool grid) {
 	glUseProgram(shader);
 
 	glm::mat4 projM = glm::mat4(0.0f);
@@ -344,10 +344,17 @@ void Mesh::draw(GLuint shader, float time, bool grid) {
 	GLuint projectID = glGetUniformLocation(shader, "projectMatrix");
 	GLuint modelViewID = glGetUniformLocation(shader, "modelViewMatrix");
 	GLuint timeID = glGetUniformLocation(shader, "time");
+	GLuint lightID = glGetUniformLocation(shader, "light");
+	GLuint localLightsID = glGetUniformLocation(shader, "localLights");
+	GLuint localLightsCountID = glGetUniformLocation(shader, "localLightsCount");
 
 	glUniformMatrix4fv(projectID, 1, GL_FALSE, &projM[0][0]);
 	glUniformMatrix4fv(modelViewID, 1, GL_FALSE, &viewM[0][0]);
 	glUniform1f(timeID, time);
+	glUniform3f(lightID, light.x, light.y, light.z);
+	if (localLights.size() > 0)
+		glUniform3fv(localLightsID, localLights.size(), &localLights[0].x);
+	glUniform1i(localLightsCountID, localLights.size());
 
 	if (grid) {
 		glBindVertexArray(vao[1]);

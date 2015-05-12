@@ -212,14 +212,16 @@ void TrainView::draw()
 	//setupFloor();
 	//glDisable(GL_LIGHTING);
 
+	Pnt3f light(-100, 100, 100);
+
 	skybox->draw();
-	ground->draw(groundShaderProgram, 0, false);
+	ground->draw(groundShaderProgram, 0, light, { { 60, 2, -60 } }, false);
 	//glEnable(GL_LIGHTING);
 	setupObjects();
 	
 	// we draw everything twice - once for real, and then once for
 	// shadows
-	drawStuff();
+	drawStuff(light);
 }
 
 bool TrainView::initTower() {
@@ -323,7 +325,7 @@ void TrainView::setProjection()
 // (otherwise, you get colored shadows)
 // this gets called twice per draw - once for the objects, once for the shadows
 // TODO if you have other objects in the world, make sure to draw them
-void TrainView::drawStuff(bool doingShadows)
+void TrainView::drawStuff(const Pnt3f &light, bool doingShadows)
 {
 	// draw the control points
 	// don't draw the control points if you're driving 
@@ -365,15 +367,15 @@ void TrainView::drawStuff(bool doingShadows)
 	glPushMatrix();
 	glTranslatef(-80, 0, 80);
 	glRotatef(-90, 1, 0, 0);
-	tower->draw(0, 0, true);
+	tower->draw(0, 0, light, {}, true);
 	glPopMatrix();
 
 	// Pool
 	glPushMatrix();
 	glTranslatef(40, 50, 40);
 	glRotatef(-90, 1, 0, 0);
-	flag->draw(poolShaderProgram, ((float) GetTickCount()) / 1000.f, false);
-	pole->draw(0, 0, false);
+	flag->draw(poolShaderProgram, ((float)GetTickCount()) / 1000.f, light, {}, false);
+	pole->draw(0, 0, light, {}, false);
 	glPopMatrix();
 }
 

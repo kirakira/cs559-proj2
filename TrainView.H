@@ -64,7 +64,7 @@ public:
 	// all of the actual drawing happens in this routine
 	// it has to be encapsulated, since we draw differently if
 	// we're drawing shadows (no colors, for example)
-	void drawStuff(bool doingShadows=false);
+	void drawStuff(const Pnt3f &light, bool doingShadows=false);
 
 	//init shaders for our objects!
 	bool initGround();
