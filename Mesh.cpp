@@ -121,10 +121,10 @@ Pnt3f Mesh::semiregularSubdivideEdge(int regular, int irregular, const vector<ve
 	else if (n == 4)
 		w = { 3.f / 8, 0, -1.f / 8, 0 };
 	else {
-		float PI = acos(-1);
+		float PI = (float) acos(-1);
 		w.resize(n);
 		for (int i = 0; i < n; ++i)
-			w[i] = (.25 + cos(2 * PI * i / n) + .5 * cos(4 * PI * i / n)) / n;
+			w[i] = (float) (.25 + cos(2 * PI * i / n) + .5 * cos(4 * PI * i / n)) / n;
 	}
 	float sum = 0;
 	for (auto t : w)

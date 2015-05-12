@@ -38,16 +38,16 @@ Pnt3f PatchSurface::pointAt(float s, float t) const {
 
 void PatchSurface::initVertexArray() {
 	vector< vector<Pnt3f> > mesh;
-	float delta = .1;
+	float delta = .1f;
 	for (float s = 0; s < controlPoints.size() - 3; s += delta) {
 		mesh.push_back(vector<Pnt3f>());
-		for (double t = 0; t < controlPoints.size() - 3; t += delta)
+		for (float t = 0; t < controlPoints.size() - 3; t += delta)
 			mesh.back().push_back(pointAt(s, t));
 	}
 	vector<Pnt3f> flatterned;
 	flatterned.push_back(mesh[0][0]);
-	for (int i = 0; i + 1 < mesh.size(); ++i) {
-		for (int j = 0; j < mesh[i].size(); ++j) {
+	for (int i = 0; i + 1 < (int) mesh.size(); ++i) {
+		for (int j = 0; j < (int) mesh[i].size(); ++j) {
 			int sj = j;
 			if (i % 2)
 				sj = mesh[i].size() - j - 1;

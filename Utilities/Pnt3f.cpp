@@ -12,17 +12,23 @@
 
 using namespace std;
 
+const float Pnt3f::EPS = 1e-3f;
+
 Pnt3f::Pnt3f() : x(0), y(0), z(0)
 {
 }
+
 Pnt3f::Pnt3f(const float* iv) : x(iv[0]), y(iv[1]), z(iv[2])
 {
 }
+
 Pnt3f::Pnt3f(const float _x, const float _y, const float _z) : x(_x), y(_y), z(_z)
 {
 }
+
 Pnt3f::Pnt3f(const Pnt3f& pt): x(pt.x), y(pt.y), z(pt.z) {
 }
+
 Pnt3f::Pnt3f(initializer_list<float> l) {
 	vector<float> v;
 	for (auto iter = l.begin(); iter != l.end(); ++iter)
@@ -35,18 +41,22 @@ Pnt3f::Pnt3f(initializer_list<float> l) {
 		z = v[2];
 }
 
+float Pnt3f::norm() const {
+	return sqrt(x * x + y * y + z * z);
+}
+
 void Pnt3f::normalize()
 {
-	float l = x*x + y*y + z*z;
-	if (l<.000001) {
+	if (isZero()) {
 		x = 0;
 		y = 1;
 		z = 0;
-	} else {
-		l = sqrt(l);
-		x /= l;
-		y /= l;
-		z /= l;
+	}
+	else {
+		auto n = norm();
+		x /= n;
+		y /= n;
+		z /= n;
 	}
 }
 
@@ -58,4 +68,8 @@ void Pnt3f::writeToBuffer(float *buffer) const {
 	buffer[0] = x;
 	buffer[1] = y;
 	buffer[2] = z;
+}
+
+bool Pnt3f::isZero() const {
+	return norm() < EPS;
 }
