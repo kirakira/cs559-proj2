@@ -18,6 +18,7 @@ class World;
 class Train;
 class Track;
 
+#include <GL/glew.h>
 //
 // You might change the TrainView in order to add different objects to
 // be drawn, or adjust the lighting, or ...
@@ -37,6 +38,7 @@ class Track;
 #include "SkyBox.h"
 #include "Mesh.h"
 #include <memory>
+#include "Fireflies.h"
 
 // note that this mainly takes care of the drawing and other window
 // stuff
@@ -47,6 +49,8 @@ class TrainView : public Fl_Gl_Window
 	std::unique_ptr<Mesh> tower;
 	std::unique_ptr<Mesh> flag;
 	std::unique_ptr<Mesh> pole;
+	std::unique_ptr<Fireflies> fireflies;
+
 	GLuint groundShaderProgram;
 	GLuint poolShaderProgram;
 	std::unique_ptr<SkyBox> skybox;
@@ -79,6 +83,8 @@ public:
 	// keep an ArcBall for the UI
 	ArcBallCam arcball;
 	void resetArcball();
+
+	void moveFireflies();
 
 	// pick a point (for when the mouse goes down)
 	void doPick();

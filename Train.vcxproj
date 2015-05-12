@@ -98,6 +98,7 @@
     <ClCompile Include="ControlPoint.cpp" />
     <ClCompile Include="CurvePiece.cpp" />
     <ClCompile Include="EnvItem.cpp" />
+    <ClCompile Include="Fireflies.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
@@ -120,6 +121,7 @@
     <ClInclude Include="ControlPoint.H" />
     <ClInclude Include="CurvePiece.h" />
     <ClInclude Include="EnvItem.h" />
+    <ClInclude Include="Fireflies.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="PatchSurface.h" />

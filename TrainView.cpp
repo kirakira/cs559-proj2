@@ -138,6 +138,7 @@ void TrainView::draw()
 		initSkyBox();
 		initTower();
 		initFlag();
+		fireflies = make_unique<Fireflies>(100);
 	}
 
 	printf("w = %d\n", w());
@@ -377,6 +378,14 @@ void TrainView::drawStuff(const Pnt3f &light, bool doingShadows)
 	flag->draw(poolShaderProgram, ((float)GetTickCount()) / 1000.f, light, {}, false);
 	pole->draw(0, 0, light, {}, false);
 	glPopMatrix();
+
+	// Fireflies
+	fireflies->draw();
+}
+
+void TrainView::moveFireflies() {
+	if (glewInitialized)
+		fireflies->randomMove();
 }
 
 // this tries to see which control point is under the mouse

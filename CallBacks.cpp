@@ -96,7 +96,7 @@ static unsigned long lastRedraw = 0;
 void runButtonCB(TrainWindow* tw)
 {
 	if (clock() - lastRedraw > CLOCKS_PER_SEC/30) {
-		lastRedraw = clock();			
+		lastRedraw = clock();
 		if (tw->runButton->value()) {
 			if (!tw->physics->value()) {
 				tw->advanceTrain();
@@ -105,6 +105,7 @@ void runButtonCB(TrainWindow* tw)
 				tw->advanceTrain(tw->world.recordDir);
 			}
 		}
+		tw->trainView->moveFireflies();
 		tw->damageMe();
 	}
 }
