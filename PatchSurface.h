@@ -9,7 +9,7 @@ class PatchSurface
 {
 	// s ranges from [0, n - 3)
 	// t ranges from [0, m - 3)
-	static Pnt3f pointAt(const std::vector<std::vector<Pnt3f>> &contronPoints,
+	static Vertex pointAt(const std::vector<std::vector<Vertex>> &contronPoints,
 		float s, float t);
 
 	PatchSurface() = delete;

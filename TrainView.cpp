@@ -248,7 +248,7 @@ bool TrainView::initGround() {
 		printf(err);
 		return false;
 	}
-	ground = PatchSurface::generate(controlPoints, 7, 7, .1);
+	ground = PatchSurface::generate(controlPoints, 7, 7, .1f);
 	return ground != nullptr;
 }
 
@@ -372,7 +372,7 @@ void TrainView::drawStuff(bool doingShadows)
 	glPushMatrix();
 	glTranslatef(40, 50, 40);
 	glRotatef(-90, 1, 0, 0);
-	flag->draw(poolShaderProgram, ((float) GetTickCount()) / 1000., false);
+	flag->draw(poolShaderProgram, ((float) GetTickCount()) / 1000.f, false);
 	pole->draw(0, 0, false);
 	glPopMatrix();
 }

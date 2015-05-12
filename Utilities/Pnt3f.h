@@ -17,6 +17,7 @@
 
 #include <cmath>
 #include <initializer_list>
+#include <glm/vec3.hpp>
 
 class Pnt3f {
 public:
@@ -32,6 +33,7 @@ public:
 				/***** CREATION */
 	Pnt3f();			/* if we have 1, we need the default */
 	Pnt3f(const Pnt3f &pt);
+	Pnt3f(const glm::vec3 &v);
 	explicit Pnt3f(const float x,const float y,const float z);	/* say where */
 	Pnt3f(const float*);			/* from an array */
 	// Pnt3f(const Pnt3f&);		/* copy constructor created by default*/
@@ -58,6 +60,8 @@ public:
 
 	void print();
 
+	glm::vec3 toGLM() const;
+
 	static const float EPS;
 };
 
@@ -77,6 +81,10 @@ inline Pnt3f Pnt3f::operator + (const Pnt3f& p) const {
 };
 inline Pnt3f Pnt3f::operator - (const Pnt3f& p) const {
 	return Pnt3f(x - p.x, y - p.y, z - p.z);
+}
+
+inline Pnt3f operator-(const Pnt3f& p) {
+	return Pnt3f(-p.x, -p.y, -p.x);
 }
 
 // cross product

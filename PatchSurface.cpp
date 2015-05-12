@@ -11,23 +11,28 @@ using namespace glm;
 
 unique_ptr<Mesh> PatchSurface::generate(const Pnt3f *control_points, int n, int m, float delta)
 {
-	auto controlPoints = vector< vector<Pnt3f> >(n, vector<Pnt3f>(m));
+	auto controlPoints = vector< vector<Vertex> >(n, vector<Vertex>(m));
 	for (int i = 0; i < n; ++i)
 		for (int j = 0; j < m; ++j)
-			controlPoints[i][j] = control_points[i * m + j];
+			controlPoints[i][j].position = control_points[i * m + j];
+	for (int i = 0; i < n; ++i)
+		for (int j = 0; j < m; ++j)
+			controlPoints[i][j].normal =
+				-(controlPoints[min(i + 1, n - 1)][j].normal - controlPoints[max(0, i - 1)][j].normal)
+					* (controlPoints[i][min(j + 1, m - 1)].normal - controlPoints[i][max(0, j - 1)].normal);
 
-	vector< vector<Pnt3f> > mesh;
+	vector<vector<Vertex>> mesh;
 	for (float s = 0; s < n - 3; s += delta) {
-		mesh.push_back(vector<Pnt3f>());
+		mesh.push_back(vector<Vertex>());
 		for (float t = 0; t < m - 3; t += delta)
-			mesh.back().push_back(pointAt(controlPoints, s, t));
+			mesh.back().emplace_back(pointAt(controlPoints, s, t));
 	}
 
-	vector<Pnt3f> vertices;
+	vector<Vertex> vertices;
 	vector<vector<int>> meshIndex;
-	for (int i = 0; i < mesh.size(); ++i) {
+	for (int i = 0; i < (int) mesh.size(); ++i) {
 		meshIndex.emplace_back(mesh[i].size());
-		for (int j = 0; j < mesh[i].size(); ++j) {
+		for (int j = 0; j < (int) mesh[i].size(); ++j) {
 			meshIndex[i][j] = vertices.size();
 			vertices.emplace_back(mesh[i][j]);
 		}
@@ -45,7 +50,7 @@ unique_ptr<Mesh> PatchSurface::generate(const Pnt3f *control_points, int n, int 
 	return make_unique<Mesh>(std::move(vertices), std::move(triangles));
 }
 
-Pnt3f PatchSurface::pointAt(const vector<vector<Pnt3f>> &controlPoints, float s, float t) {
+Vertex PatchSurface::pointAt(const vector<vector<Vertex>> &controlPoints, float s, float t) {
 	int i_start = (int) floor(s), j_start = (int) floor(t);
 	vector<Pnt3f> vp;
 	for (int i = i_start; i < i_start + 4; ++i) {
@@ -54,5 +59,5 @@ Pnt3f PatchSurface::pointAt(const vector<vector<Pnt3f>> &controlPoints, float s,
 		vp.emplace_back(cp.positionAt(t - (int) t));
 	}
 	CardinalPiece cp(vp[1], vp[2], vp[0], vp[3], .5);
-	return cp.positionAt(s - (int) s);
+	return Vertex(cp.positionAt(s - (int) s), cp.tangentAt(s - (int) s));
 }

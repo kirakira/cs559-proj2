@@ -30,6 +30,8 @@ unique_ptr<Mesh> ModelLoader::load(const string &filename) {
 		return nullptr;
 
 	vector<Pnt3f> vertices;
+	vector<Pnt3f> normals;
+	map<int, int> vertexToNormal;
 	vector<tuple<int, int, int>> faces;
 
 	string line;
@@ -44,6 +46,11 @@ unique_ptr<Mesh> ModelLoader::load(const string &filename) {
 			ss >> x >> y >> z;
 			vertices.emplace_back(Pnt3f(x, y, z));
 		}
+		else if (command == "vn") {
+			float x, y, z;
+			ss >> x >> y >> z;
+			normals.emplace_back(Pnt3f(x, y, z));
+		}
 		else if (command == "f") {
 			vector<int> fi;
 			for (int i = 0; i < 3; ++i) {
@@ -54,9 +61,16 @@ unique_ptr<Mesh> ModelLoader::load(const string &filename) {
 					cerr << "Bad model file: " << line << endl;
 				else {
 					int x = parseInt(components[0]);
-					if (x > vertices.size() || x <= 0)
+					if (x > (int) vertices.size() || x <= 0)
 						cerr << "Index out of range (only has " << vertices.size() << " vertices): " << line << endl;
 					fi.emplace_back(x - 1);
+
+					if (components.size() >= 3) {
+						int z = parseInt(components[2]);
+						if (z > (int)normals.size() || z <= 0)
+							cerr << "Index out of range (only has " << normals.size() << " normals): " << line << endl;
+						vertexToNormal[x - 1] = z - 1;
+					}
 				}
 			}
 			if (fi.size() < 3)
@@ -68,5 +82,12 @@ unique_ptr<Mesh> ModelLoader::load(const string &filename) {
 
 	fin.close();
 
-	return make_unique<Mesh>(std::move(vertices), std::move(faces));
+	vector<Vertex> v;
+	for (int i = 0; i < (int) vertices.size(); ++i) {
+		v.emplace_back(vertices[i], Pnt3f(0, 0, 0));
+		if (vertexToNormal.count(i) > 0)
+			v.back().normal = normals[vertexToNormal[i]];
+	}
+
+	return make_unique<Mesh>(std::move(v), std::move(faces));
 }

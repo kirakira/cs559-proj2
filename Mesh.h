@@ -6,11 +6,35 @@
 #include <set>
 #include <map>
 #include "Utilities/Pnt3f.h"
+#include "ControlPoint.H"
+
+struct Vertex {
+	Pnt3f position;
+	Pnt3f normal;
+
+	Vertex() = default;
+	Vertex(const glm::vec3 &pos, const glm::vec3 &norm)
+		: position(pos)
+		, normal(norm) {}
+	Vertex(const Pnt3f &pos, const Pnt3f &norm)
+		: position(pos.toGLM())
+		, normal(norm.toGLM()) {}
+
+	void writeToBuffer(float *buffer) const {
+		position.writeToBuffer(buffer);
+		normal.writeToBuffer(buffer + 3 * sizeof(float));
+	}
+
+	operator ControlPoint() const {
+		return ControlPoint(position, normal);
+	}
+};
 
 class Mesh
 {
-	std::vector<Pnt3f> vertices;
+	std::vector<Vertex> vertices;
 	std::vector<std::tuple<int, int, int>> faces;
+
 	std::vector<std::set<int>> vertexNeighbours; // indices of faces adjacent to a given vertex
 	int sidePointsCount;
 
@@ -31,7 +55,7 @@ class Mesh
 	void move(Mesh&& m);
 
 public:
-	Mesh(std::vector<Pnt3f> vertices, std::vector<std::tuple<int, int, int>> faces);
+	Mesh(std::vector<Vertex> vertices, std::vector<std::tuple<int, int, int>> faces);
 	Mesh(const Mesh &m);
 	virtual ~Mesh();
 

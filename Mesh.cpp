@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Mesh::Mesh(vector<Pnt3f> v, vector<tuple<int, int, int>> f)
+Mesh::Mesh(vector<Vertex> v, vector<tuple<int, int, int>> f)
 	: vertices(std::move(v))
 	, faces(std::move(f))
 	, vertexNeighbours(vertices.size())
@@ -75,19 +75,19 @@ void Mesh::modifiedButterfly() {
 			auto v = subdivideEdge(i, j, adj, commonNeighbours);
 			newVertices[make_pair(i, j)] = (int)vertices.size();
 			newVertices[make_pair(j, i)] = (int)vertices.size();
-			vertices.emplace_back(v);
+			vertices.emplace_back(v, .5 * (vertices[i].normal + vertices[j].normal));
 		}
 		if (newVertices.count(make_pair(i, k)) == 0) {
 			auto v = subdivideEdge(i, k, adj, commonNeighbours);
 			newVertices[make_pair(i, k)] = (int)vertices.size();
 			newVertices[make_pair(k, i)] = (int)vertices.size();
-			vertices.emplace_back(v);
+			vertices.emplace_back(v, .5 * (vertices[i].normal + vertices[k].normal));
 		}
 		if (newVertices.count(make_pair(k, j)) == 0) {
 			auto v = subdivideEdge(k, j, adj, commonNeighbours);
 			newVertices[make_pair(k, j)] = (int)vertices.size();
 			newVertices[make_pair(j, k)] = (int)vertices.size();
-			vertices.emplace_back(v);
+			vertices.emplace_back(v, .5 * (vertices[k].normal + vertices[j].normal));
 		}
 	}
 
@@ -139,9 +139,9 @@ Pnt3f Mesh::semiregularSubdivideEdge(int regular, int irregular, const vector<ve
 			start = i;
 	assert(start != -1);
 
-	Pnt3f ans = (1 - sum) * vertices[irregular];
+	Pnt3f ans = (1 - sum) * vertices[irregular].position;
 	for (int i = 0; i < n; ++i)
-		ans = ans + w[i] * vertices[adj[irregular][(i + start) % n]];
+		ans = ans + w[i] * vertices[adj[irregular][(i + start) % n]].position;
 
 	return ans;
 }
@@ -150,11 +150,11 @@ Pnt3f Mesh::subdivideEdge(int u, int v, const vector<vector<int>> &adj,
 	const map<pair<int, int>, vector<int>> &commonNeighbours) const {
 
 	if (adj[u].size() == 6 && adj[v].size() == 6) {
-		Pnt3f ans = (1.f / 2 + 1.f / 8) * (vertices[u] + vertices[v]);
+		Pnt3f ans = (1.f / 2 + 1.f / 8) * (vertices[u].position + vertices[v].position);
 		const auto &n1 = commonNeighbours.at(make_pair(u, v));
 		if (n1.size() != 2)
 			goto out;
-		ans = ans + 1. / 8 * (vertices[n1[0]] + vertices[n1[1]]);
+		ans = ans + 1. / 8 * (vertices[n1[0]].position + vertices[n1[1]].position);
 
 		for (int n : n1) {
 			{
@@ -162,7 +162,7 @@ Pnt3f Mesh::subdivideEdge(int u, int v, const vector<vector<int>> &adj,
 				if (n2.size() != 2)
 					goto out;
 				for (int i = 0; i < 2; ++i)
-					ans = ans - 1.f / 16 * vertices[n2[i]];
+					ans = ans - 1.f / 16 * vertices[n2[i]].position;
 			}
 
 			{
@@ -170,7 +170,7 @@ Pnt3f Mesh::subdivideEdge(int u, int v, const vector<vector<int>> &adj,
 				if (n2.size() != 2)
 					goto out;
 				for (int i = 0; i < 2; ++i)
-					ans = ans - 1.f / 16 * vertices[n2[i]];
+					ans = ans - 1.f / 16 * vertices[n2[i]].position;
 			}
 		}
 		return ans;
@@ -189,7 +189,7 @@ out:
 		return .5f * (a + b);
 	}
 
-	return .5 * (vertices[u] + vertices[v]);
+	return .5 * (vertices[u].position + vertices[v].position);
 }
 
 vector<int> Mesh::adjacentVertices(int v) const {
@@ -259,7 +259,7 @@ vector<int> Mesh::adjacentVertices(int v) const {
 
 void Mesh::initVertexArray() {
 	int n = faces.size();
-	float *buffer = new float[n * 3 * 3];
+	float *buffer = new float[n * 3 * 6];
 	for (int i = 0; i < n; ++i) {
 		vertices[get<0>(faces[i])].writeToBuffer(buffer + 9 * i);
 		vertices[get<1>(faces[i])].writeToBuffer(buffer + 9 * i + 3);
@@ -271,10 +271,13 @@ void Mesh::initVertexArray() {
 
 	glGenBuffers(2, vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, n * 3 * 3 * sizeof(float), buffer, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, n * 3 * 6 * sizeof(float), buffer, GL_STATIC_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
 	glEnableVertexAttribArray(0);
+
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*) sizeof(float));
+	glEnableVertexAttribArray(1);
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -286,18 +289,18 @@ void Mesh::initVertexArray() {
 	for (const auto &f : faces) {
 		int i = get<0>(f), j = get<1>(f), k = get<2>(f);
 		if (added.count(make_pair(min(i, j), max(i, j))) == 0) {
-			sidePoints.emplace_back(vertices[i]);
-			sidePoints.emplace_back(vertices[j]);
+			sidePoints.emplace_back(vertices[i].position);
+			sidePoints.emplace_back(vertices[j].position);
 			added.emplace(make_pair(min(i, j), max(i, j)));
 		}
 		if (added.count(make_pair(min(i, k), max(i, k))) == 0) {
-			sidePoints.emplace_back(vertices[i]);
-			sidePoints.emplace_back(vertices[k]);
+			sidePoints.emplace_back(vertices[i].position);
+			sidePoints.emplace_back(vertices[k].position);
 			added.emplace(make_pair(min(i, k), max(i, k)));
 		}
 		if (added.count(make_pair(min(k, j), max(k, j))) == 0) {
-			sidePoints.emplace_back(vertices[k]);
-			sidePoints.emplace_back(vertices[j]);
+			sidePoints.emplace_back(vertices[k].position);
+			sidePoints.emplace_back(vertices[j].position);
 			added.emplace(make_pair(min(k, j), max(k, j)));
 		}
 	}

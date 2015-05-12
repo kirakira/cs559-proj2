@@ -29,6 +29,9 @@ Pnt3f::Pnt3f(const float _x, const float _y, const float _z) : x(_x), y(_y), z(_
 Pnt3f::Pnt3f(const Pnt3f& pt): x(pt.x), y(pt.y), z(pt.z) {
 }
 
+Pnt3f::Pnt3f(const glm::vec3 &v) : x(v.x), y(v.y), z(v.z) {
+}
+
 Pnt3f::Pnt3f(initializer_list<float> l) {
 	vector<float> v;
 	for (auto iter = l.begin(); iter != l.end(); ++iter)
@@ -72,4 +75,8 @@ void Pnt3f::writeToBuffer(float *buffer) const {
 
 bool Pnt3f::isZero() const {
 	return norm() < EPS;
+}
+
+glm::vec3 Pnt3f::toGLM() const {
+	return glm::vec3(x, y, z);
 }
