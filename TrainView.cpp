@@ -8,6 +8,7 @@
 #include "GL/gl.h"
 #include "GL/glu.h"
 #include "glm/glm.hpp"
+#include "glm/gtx/transform.hpp"
 #include "ShaderTools.H"
 
 #include "TrainView.H"
@@ -239,7 +240,8 @@ void TrainView::draw()
 	//billboard->draw();
 
 	skybox->draw();
-	ground->draw(groundShaderProgram, 0, sunPosition, fireflies->getPositions(), Pnt3f(), false);
+	ground->draw(groundShaderProgram, glm::mat4(), glm::mat4(),
+		0, sunPosition, fireflies->getPositions(), Pnt3f(), false);
 	//glEnable(GL_LIGHTING);
 
 	setupObjects();
@@ -268,7 +270,7 @@ bool TrainView::initSun() {
 	}
 	vector<Pnt3f> points;
 	float r = 10;
-	for (float angle = 0; angle <= acos(-1); angle += .02)
+	for (float angle = 0; angle <= acos(-1.f); angle += .02)
 		points.emplace_back(0, sin(angle) * r, -cos(angle) * r);
 	points.emplace(points.begin(), 0, -r, -r);
 	points.emplace_back(0, -r, r);
@@ -434,15 +436,21 @@ void TrainView::drawStuff(bool doingShadows)
 	glPushMatrix();
 	glTranslatef(-80, 0, 80);
 	glRotatef(-90, 1, 0, 0);
-	tower->draw(basicShaderProgram, 0, sunPosition, fireflies->getPositions(), Pnt3f(.87, .72, .53), false);
+	tower->draw(basicShaderProgram, glm::translate(vec3(-80, 0, 80)) * glm::rotate(-90.f, vec3(1, 0, 0)),
+		glm::rotate(-90.f, vec3(1, 0, 0)), 0, sunPosition, fireflies->getPositions(),
+		Pnt3f(.87, .72, .53), false);
 	glPopMatrix();
 
-	// Pool
+	// Flag
 	glPushMatrix();
 	glTranslatef(40, 50, 40);
 	glRotatef(-90, 1, 0, 0);
-	flag->draw(poolShaderProgram, ((float)GetTickCount()) / 1000.f, sunPosition, fireflies->getPositions(), Pnt3f(), false);
-	pole->draw(basicShaderProgram, 0, sunPosition, fireflies->getPositions(), Pnt3f(.54, .27, .07), false);
+	flag->draw(poolShaderProgram, glm::translate(vec3(40, 50, 40)) * glm::rotate(-90.f, vec3(1, 0, 0)),
+		glm::rotate(-90.f, vec3(1, 0, 0)),
+		((float)GetTickCount()) / 1000.f, sunPosition, fireflies->getPositions(), Pnt3f(), false);
+	pole->draw(basicShaderProgram, glm::translate(vec3(40, 50, 40)) * glm::rotate(-90.f, vec3(1, 0, 0)),
+		glm::rotate(-90.f, vec3(1, 0, 0)),
+		0, sunPosition, fireflies->getPositions(), Pnt3f(.54, .27, .07), false);
 	glPopMatrix();
 
 	// Fireflies
@@ -452,7 +460,9 @@ void TrainView::drawStuff(bool doingShadows)
 	if (sunPosition.y >= 0) {
 		glPushMatrix();
 		glTranslated(sunPosition.x, sunPosition.y, sunPosition.z);
-		sun->draw(basicShaderProgram, 0, sunPosition, fireflies->getPositions(), Pnt3f(1, .45, 0), false);
+		sun->draw(sunShaderProgram, glm::translate(glm::vec3(sunPosition.x, sunPosition.y, sunPosition.z)),
+			glm::translate(glm::vec3(sunPosition.x, sunPosition.y, sunPosition.z)),
+			0, sunPosition, fireflies->getPositions(), Pnt3f(1, .45, 0), false);
 		glPopMatrix();
 	}
 }

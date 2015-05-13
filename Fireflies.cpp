@@ -80,6 +80,7 @@ void Fireflies::draw() const {
 	glGetFloatv(GL_PROJECTION_MATRIX, &projM[0][0]);
 	glGetFloatv(GL_MODELVIEW_MATRIX, &viewM[0][0]);
 	GLuint projectID = glGetUniformLocation(shader, "projectMatrix");
+	GLuint positionModelID = glGetUniformLocation(shader, "positionModelMatrix");
 	GLuint modelViewID = glGetUniformLocation(shader, "modelViewMatrix");
 	GLuint localLightsID = glGetUniformLocation(shader, "localLights");
 	GLuint localLightsCountID = glGetUniformLocation(shader, "localLightsCount");

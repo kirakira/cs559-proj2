@@ -9,5 +9,26 @@ uniform int localLightsCount;
   
 void main()
 {
-	gl_FragColor = vec4(ourColor, 1.0f);
+	vec3 combinedLight = vec3(0, 0, 0);
+
+	vec3 v1 = light - f_position;
+	float factor = dot(v1, f_normal);
+	if (factor > .001) {
+		factor /= length(v1) * length(f_normal);
+	} else
+		factor = 0;
+	combinedLight += factor * vec3(1, 1, 1);
+
+	for (int i = 0; i < localLightsCount; ++i) {
+		v1 = localLights[i] - f_position;
+		factor = dot(v1, f_normal);
+		float dist = distance(localLights[i], f_position);
+		if (factor > .001) {
+			factor = factor / length(v1) / length(f_normal) / max(.01, dist * dist / 10);
+		} else
+			factor = 0;
+		combinedLight += min(vec3(1, 1, 1), factor * vec3(.22, .20, .34));
+	}
+
+	gl_FragColor = vec4(min(vec3(1, 1, 1), ourColor * combinedLight), 1.0f);
 }
