@@ -17,6 +17,18 @@
 #include "Utilities/3DUtils.H"
 
 #include <Fl/fl.h>
+#include "PatchSurface.h"
+#include "Mesh.h"
+#include "Model.h"
+#include "RevolutionSurface.h"
+
+#include "Utilities/3DUtils.H"
+
+#include <Fl/fl.h>
+#include <iostream>
+
+// we will need OpenGL, and OpenGL needs windows.h
+
 #include <windows.h>
 
 #include "PatchSurface.h"
@@ -132,6 +144,9 @@ void TrainView::draw()
 		initSkyBox();
 		initProjector();
 		initBillBoard();
+		initTower();
+		initFlag();
+		fireflies = make_unique<Fireflies>(100);
 	}
 
 	glViewport(0,0,w(),h());
@@ -149,7 +164,7 @@ void TrainView::draw()
 	glEnable(GL_DEPTH);
 
 	// Blayne prefers GL_DIFFUSE
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
 	// prepare for projection
 	glMatrixMode(GL_PROJECTION);
@@ -212,13 +227,26 @@ void TrainView::draw()
 	//projector->draw();
 	//billboard->draw();
 
+	Pnt3f light(-100, 100, 100);
+
+	skybox->draw();
+	ground->draw(groundShaderProgram, 0, light, fireflies->getPositions(), false);
 	//glEnable(GL_LIGHTING);
 
 	setupObjects();
 	
 	// we draw everything twice - once for real, and then once for
 	// shadows
-	drawStuff();
+	drawStuff(light);
+}
+
+bool TrainView::initTower() {
+	tower = RevolutionSurface::generate({ { 0, 10, -1 }, { 0, 9, 1 },
+	{ 0, 6, 80 }, { 0, 10, 85 }, { 0, 0, 100 }, { 0, 0, 120 } });
+	if (!tower)
+		return false;
+	//tower->modifiedButterfly();
+	return true;
 }
 
 bool TrainView::initGround() {
@@ -238,8 +266,31 @@ bool TrainView::initGround() {
 		printf(err);
 		return false;
 	}
-	ground = make_unique<PatchSurface>(controlPoints, 7, 7, groundShaderProgram);
-	return true;
+	ground = PatchSurface::generate(controlPoints, 7, 7, .1f);
+	return ground != nullptr;
+}
+
+bool TrainView::initFlag() {
+	char *err;
+	poolShaderProgram = loadShader("shaders/pool.vert", "shaders/pool.frag", err);
+	if (poolShaderProgram == 0) {
+		printf(err);
+		return false;
+	}
+
+	vector<Pnt3f> controlPoints;
+	int n = 28, m = 17;
+	for (int i = 0; i < n; ++i)
+		for (int j = 0; j < m; ++j)
+			controlPoints.emplace_back(i, 0, j);
+
+	flag = PatchSurface::generate(&controlPoints[0], n, m, 1);
+	if (!pool)
+		return false;
+
+	controlPoints = { { 0, 1, -100 }, { 0, 1, -45 }, { 0, 1, 20 }, { 0, 1, 40 } };
+	pole = RevolutionSurface::generate(std::move(controlPoints));
+	return pole != nullptr;
 }
 
 bool TrainView::initSkyBox() {
@@ -313,9 +364,8 @@ void TrainView::setProjection()
 // (otherwise, you get colored shadows)
 // this gets called twice per draw - once for the objects, once for the shadows
 // TODO if you have other objects in the world, make sure to draw them
-void TrainView::drawStuff(bool doingShadows)
+void TrainView::drawStuff(const Pnt3f &light, bool doingShadows)
 {
-
 	// draw the control points
 	// don't draw the control points if you're driving 
 	// (otherwise you get sea-sick as you drive through them)
@@ -350,6 +400,30 @@ void TrainView::drawStuff(bool doingShadows)
 		track->drawTrain(doingShadows);
 
 	tw->world.drawItems(doingShadows);
+
+
+	// Tower
+	glPushMatrix();
+	glTranslatef(-80, 0, 80);
+	glRotatef(-90, 1, 0, 0);
+	tower->draw(0, 0, light, fireflies->getPositions(), true);
+	glPopMatrix();
+
+	// Pool
+	glPushMatrix();
+	glTranslatef(40, 50, 40);
+	glRotatef(-90, 1, 0, 0);
+	flag->draw(poolShaderProgram, ((float)GetTickCount()) / 1000.f, light, fireflies->getPositions(), false);
+	pole->draw(0, 0, light, fireflies->getPositions(), false);
+	glPopMatrix();
+
+	// Fireflies
+	fireflies->draw();
+}
+
+void TrainView::moveFireflies() {
+	if (glewInitialized)
+		fireflies->randomMove();
 }
 
 // this tries to see which control point is under the mouse

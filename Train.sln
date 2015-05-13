@@ -13,6 +13,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		shaders\ground.vert = shaders\ground.vert
 		shaders\projector.frag = shaders\projector.frag
 		shaders\projector.vert = shaders\projector.vert
+		shaders\firefly.frag = shaders\firefly.frag
+		shaders\firefly.vert = shaders\firefly.vert
+		shaders\ground.frag = shaders\ground.frag
+		shaders\ground.vert = shaders\ground.vert
+		shaders\pool.frag = shaders\pool.frag
+		shaders\pool.vert = shaders\pool.vert
 		shaders\skybox.frag = shaders\skybox.frag
 		shaders\skybox.vert = shaders\skybox.vert
 	EndProjectSection

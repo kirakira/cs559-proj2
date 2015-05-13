@@ -1,4 +1,4 @@
-#version 400
+#version 330
 in vec3 ourColor;
 in vec3 f_position;
 in vec3 f_normal;
@@ -24,7 +24,7 @@ void main()
 		factor = dot(v1, f_normal);
 		float dist = distance(localLights[i], f_position);
 		if (factor > .001) {
-			factor = factor / length(v1) / length(f_normal) / max(.01, dist * dist / 10);
+			factor = factor / length(v1) / length(f_normal) / max(.01, dist * dist / 30);
 		} else
 			factor = 0;
 		combinedLight += min(vec3(1, 1, 1), factor * vec3(.22, .20, .34));

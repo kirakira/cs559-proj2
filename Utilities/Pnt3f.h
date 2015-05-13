@@ -17,6 +17,7 @@
 
 #include <cmath>
 #include <initializer_list>
+#include <glm/vec3.hpp>
 
 class Pnt3f {
 public:
@@ -32,6 +33,7 @@ public:
 				/***** CREATION */
 	Pnt3f();			/* if we have 1, we need the default */
 	Pnt3f(const Pnt3f &pt);
+	Pnt3f(const glm::vec3 &v);
 	explicit Pnt3f(const float x,const float y,const float z);	/* say where */
 	Pnt3f(const float*);			/* from an array */
 	// Pnt3f(const Pnt3f&);		/* copy constructor created by default*/
@@ -43,6 +45,9 @@ public:
 	Pnt3f operator + (const Pnt3f&) const;	/* create a temp */
 	Pnt3f operator - (const Pnt3f&) const;
 
+	float norm() const;
+	bool isZero() const;
+
 	// make sure that we're unit length - vertical in the error case (0 length)
 	void normalize();
 
@@ -51,7 +56,13 @@ public:
 
 	float length() const;
 
+	void writeToBuffer(float *buffer) const;
+
 	void print();
+
+	glm::vec3 toGLM() const;
+
+	static const float EPS;
 };
 
 // inline definitions
@@ -72,6 +83,10 @@ inline Pnt3f Pnt3f::operator - (const Pnt3f& p) const {
 	return Pnt3f(x - p.x, y - p.y, z - p.z);
 }
 
+inline Pnt3f operator-(const Pnt3f& p) {
+	return Pnt3f(-p.x, -p.y, -p.x);
+}
+
 // cross product
 inline Pnt3f Pnt3f::operator*(const Pnt3f& p) const {
   Pnt3f q;
@@ -84,4 +99,32 @@ inline Pnt3f Pnt3f::operator*(const Pnt3f& p) const {
 // length
 inline float Pnt3f::length() const {
 	return sqrt(x * x + y * y + z * z);
+}
+
+inline float dot(const Pnt3f &a, const Pnt3f &b) {
+	return a.x * b.x + a.y * b.y + a.z * b.z;
+}
+
+inline bool feq(float a, float b) {
+	return fabs(a - b) < Pnt3f::EPS;
+}
+
+inline bool flt(float a, float b) {
+	return a < b && !feq(a, b);
+}
+
+inline bool flet(float a, float b) {
+	return a < b || feq(a, b);
+}
+
+inline bool fgt(float a, float b) {
+	return !flet(a, b);
+}
+
+inline bool fget(float a, float b) {
+	return !flt(a, b);
+}
+
+inline bool colinear(const Pnt3f &a, const Pnt3f &b, const Pnt3f &c) {
+	return ((a - b) * (a - c)).isZero();
 }
