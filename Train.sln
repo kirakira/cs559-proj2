@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Train", "Train.vcxproj", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4E773C4F-4504-467F-9218-62160579DF5F}"
 	ProjectSection(SolutionItems) = preProject
+		shaders\firefly.frag = shaders\firefly.frag
+		shaders\firefly.vert = shaders\firefly.vert
 		shaders\ground.frag = shaders\ground.frag
 		shaders\ground.vert = shaders\ground.vert
 		shaders\pool.frag = shaders\pool.frag

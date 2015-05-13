@@ -15,6 +15,8 @@ class Fireflies
 	const float xmin = -100, xmax = 100, zmin = -100, zmax = 100, ymin = 0, ymax = 50;
 	const float stepLength = .5f;
 
+	GLuint shader;
+
 public:
 	Fireflies(int n);
 	virtual ~Fireflies() = default;

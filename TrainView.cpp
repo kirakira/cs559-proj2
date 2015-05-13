@@ -216,7 +216,7 @@ void TrainView::draw()
 	Pnt3f light(-100, 100, 100);
 
 	skybox->draw();
-	ground->draw(groundShaderProgram, 0, light, { { 60, 2, -60 } }, false);
+	ground->draw(groundShaderProgram, 0, light, fireflies->getPositions(), false);
 	//glEnable(GL_LIGHTING);
 	setupObjects();
 	
@@ -368,15 +368,15 @@ void TrainView::drawStuff(const Pnt3f &light, bool doingShadows)
 	glPushMatrix();
 	glTranslatef(-80, 0, 80);
 	glRotatef(-90, 1, 0, 0);
-	tower->draw(0, 0, light, {}, true);
+	tower->draw(0, 0, light, fireflies->getPositions(), true);
 	glPopMatrix();
 
 	// Pool
 	glPushMatrix();
 	glTranslatef(40, 50, 40);
 	glRotatef(-90, 1, 0, 0);
-	flag->draw(poolShaderProgram, ((float)GetTickCount()) / 1000.f, light, {}, false);
-	pole->draw(0, 0, light, {}, false);
+	flag->draw(poolShaderProgram, ((float)GetTickCount()) / 1000.f, light, fireflies->getPositions(), false);
+	pole->draw(0, 0, light, fireflies->getPositions(), false);
 	glPopMatrix();
 
 	// Fireflies

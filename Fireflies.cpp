@@ -2,6 +2,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <glm/matrix.hpp>
+#include "Utilities\ShaderTools.H"
+#include <iostream>
 
 using namespace std;
 
@@ -10,6 +12,11 @@ Fireflies::Fireflies(int n)
 	srand(time(0));
 	for (int i = 0; i < n; ++i)
 		positions.emplace_back(randPosition());
+
+	char *err;
+	shader = loadShader("shaders/firefly.vert", "shaders/firefly.frag", err);
+	if (shader == 0)
+		cerr << err << endl;
 }
 
 float Fireflies::randFloat() const {
@@ -51,8 +58,6 @@ void Fireflies::draw() const {
 	if (positions.size() == 0)
 		return;
 
-	GLuint shader = 0;
-
 	GLuint vao, vbo;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
@@ -76,8 +81,14 @@ void Fireflies::draw() const {
 	glGetFloatv(GL_MODELVIEW_MATRIX, &viewM[0][0]);
 	GLuint projectID = glGetUniformLocation(shader, "projectMatrix");
 	GLuint modelViewID = glGetUniformLocation(shader, "modelViewMatrix");
+	GLuint localLightsID = glGetUniformLocation(shader, "localLights");
+	GLuint localLightsCountID = glGetUniformLocation(shader, "localLightsCount");
+
 	glUniformMatrix4fv(projectID, 1, GL_FALSE, &projM[0][0]);
 	glUniformMatrix4fv(modelViewID, 1, GL_FALSE, &viewM[0][0]);
+	glUniform3fv(localLightsID, positions.size(), &positions[0].x);
+	glUniform1i(localLightsCountID, positions.size());
+
 
 	glBindVertexArray(vao);
 	glDrawArrays(GL_POINTS, 0, positions.size());
