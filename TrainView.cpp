@@ -134,6 +134,11 @@ void TrainView::draw()
 		if (GLEW_OK != err)
 			fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 
+		char *errMessage;
+		basicShaderProgram = loadShader("shaders/basic.vert", "shaders/basic.frag", errMessage);
+		if (basicShaderProgram == 0)
+			fprintf(stderr, "Error: %s\n", errMessage);
+
 		initGround();
 		initSkyBox();
 		initTower();
@@ -216,7 +221,7 @@ void TrainView::draw()
 	Pnt3f light(-100, 100, 100);
 
 	skybox->draw();
-	ground->draw(groundShaderProgram, 0, light, fireflies->getPositions(), false);
+	ground->draw(groundShaderProgram, 0, light, fireflies->getPositions(), Pnt3f(), false);
 	//glEnable(GL_LIGHTING);
 	setupObjects();
 	
@@ -226,11 +231,12 @@ void TrainView::draw()
 }
 
 bool TrainView::initTower() {
-	tower = RevolutionSurface::generate({ { 0, 10, -1 }, { 0, 9, 1 },
-	{ 0, 6, 80 }, { 0, 10, 85 }, { 0, 0, 100 }, { 0, 0, 120 } });
+	tower = RevolutionSurface::generate({ { 0, 10, -1 }, { 0, 9, 1 }, { 0, 7, 30 }, { 0, 10, 45 }, { 0, 10, 50 },
+	{ 0, 6, 55 }, { 0, 6, 65 },
+	{ 0, 8, 80 }, { 0, 8, 85 }, { 0, 0, 100 }, { 0, 0, 120 } });
 	if (!tower)
 		return false;
-	//tower->modifiedButterfly();
+	tower->modifiedButterfly();
 	return true;
 }
 
@@ -368,15 +374,15 @@ void TrainView::drawStuff(const Pnt3f &light, bool doingShadows)
 	glPushMatrix();
 	glTranslatef(-80, 0, 80);
 	glRotatef(-90, 1, 0, 0);
-	tower->draw(0, 0, light, fireflies->getPositions(), true);
+	tower->draw(basicShaderProgram, 0, light, fireflies->getPositions(), Pnt3f(.87, .72, .53), false);
 	glPopMatrix();
 
 	// Pool
 	glPushMatrix();
 	glTranslatef(40, 50, 40);
 	glRotatef(-90, 1, 0, 0);
-	flag->draw(poolShaderProgram, ((float)GetTickCount()) / 1000.f, light, fireflies->getPositions(), false);
-	pole->draw(0, 0, light, fireflies->getPositions(), false);
+	flag->draw(poolShaderProgram, ((float)GetTickCount()) / 1000.f, light, fireflies->getPositions(), Pnt3f(), false);
+	pole->draw(basicShaderProgram, 0, light, fireflies->getPositions(), Pnt3f(.54, .27, .07), false);
 	glPopMatrix();
 
 	// Fireflies

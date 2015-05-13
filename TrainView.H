@@ -53,6 +53,8 @@ class TrainView : public Fl_Gl_Window
 
 	GLuint groundShaderProgram;
 	GLuint poolShaderProgram;
+	GLuint basicShaderProgram;
+
 	std::unique_ptr<SkyBox> skybox;
 	GLuint skyBoxProgram;
 
