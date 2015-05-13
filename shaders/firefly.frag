@@ -15,5 +15,5 @@ void main()
 		combinedLight += min(vec3(1, 1, 1), factor * vec3(.22, .20, .34));
 	}
 
-	gl_FragColor = vec4(min(vec3(1, 1, 1), ourColor * combinedLight), 1.0f);
+	gl_FragColor = vec4(min(vec3(1, 1, 1), ourColor * combinedLight), 1.0);
 }
