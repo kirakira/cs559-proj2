@@ -23,6 +23,8 @@ public:
 
 	void randomMove();
 	void draw() const;
+	void resize(int n);
+
 	std::vector<Pnt3f> getPositions() const;
 };
 

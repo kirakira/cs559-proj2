@@ -241,7 +241,7 @@ void TrainView::draw()
 
 	skybox->draw();
 	ground->draw(groundShaderProgram, glm::mat4(), glm::mat4(),
-		0, sunPosition, fireflies->getPositions(), Pnt3f(), false);
+		0, sunPosition, sunPosition.y < 0 ? fireflies->getPositions() : vector<Pnt3f>(), Pnt3f(), false);
 	//glEnable(GL_LIGHTING);
 
 	setupObjects();
@@ -437,7 +437,7 @@ void TrainView::drawStuff(bool doingShadows)
 	glTranslatef(-80, 0, 80);
 	glRotatef(-90, 1, 0, 0);
 	tower->draw(basicShaderProgram, glm::translate(vec3(-80, 0, 80)) * glm::rotate(-90.f, vec3(1, 0, 0)),
-		glm::rotate(-90.f, vec3(1, 0, 0)), 0, sunPosition, fireflies->getPositions(),
+		glm::rotate(-90.f, vec3(1, 0, 0)), 0, sunPosition, sunPosition.y < 0 ? fireflies->getPositions() : vector<Pnt3f>(),
 		Pnt3f(.87, .72, .53), false);
 	glPopMatrix();
 
@@ -447,14 +447,16 @@ void TrainView::drawStuff(bool doingShadows)
 	glRotatef(-90, 1, 0, 0);
 	flag->draw(poolShaderProgram, glm::translate(vec3(40, 50, 40)) * glm::rotate(-90.f, vec3(1, 0, 0)),
 		glm::rotate(-90.f, vec3(1, 0, 0)),
-		((float)GetTickCount()) / 1000.f, sunPosition, fireflies->getPositions(), Pnt3f(), false);
+		((float)GetTickCount()) / 1000.f, sunPosition, sunPosition.y < 0 ? fireflies->getPositions() : vector<Pnt3f>(),
+		Pnt3f(), false);
 	pole->draw(basicShaderProgram, glm::translate(vec3(40, 50, 40)) * glm::rotate(-90.f, vec3(1, 0, 0)),
 		glm::rotate(-90.f, vec3(1, 0, 0)),
 		0, sunPosition, fireflies->getPositions(), Pnt3f(.54, .27, .07), false);
 	glPopMatrix();
 
 	// Fireflies
-	fireflies->draw();
+	if (sunPosition.y <= 0)
+		fireflies->draw();
 
 	// The sun
 	if (sunPosition.y >= 0) {
@@ -462,7 +464,7 @@ void TrainView::drawStuff(bool doingShadows)
 		glTranslated(sunPosition.x, sunPosition.y, sunPosition.z);
 		sun->draw(sunShaderProgram, glm::translate(glm::vec3(sunPosition.x, sunPosition.y, sunPosition.z)),
 			glm::translate(glm::vec3(sunPosition.x, sunPosition.y, sunPosition.z)),
-			0, sunPosition, fireflies->getPositions(), Pnt3f(1, .45, 0), false);
+			0, sunPosition, sunPosition.y < 0 ? fireflies->getPositions() : vector<Pnt3f>(), Pnt3f(1, .45, 0), false);
 		glPopMatrix();
 	}
 }

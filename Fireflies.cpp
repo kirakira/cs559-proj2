@@ -54,6 +54,13 @@ void Fireflies::randomMove() {
 	}
 }
 
+void Fireflies::resize(int n) {
+	while (n > positions.size())
+		positions.emplace_back(randPosition());
+	if (n < positions.size())
+		positions.resize(n);
+}
+
 void Fireflies::draw() const {
 	if (positions.size() == 0)
 		return;
