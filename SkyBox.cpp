@@ -1,25 +1,29 @@
 #include "GL/glew.h"
 #include "glm/glm.hpp"
+#include "glm/gtx/string_cast.hpp"
 #include "FL/gl.h"
 #include "SkyBox.h"
 #include "Utilities/libtarga.h"
 
 #include <cstdio>
 #include <cmath>
+#include <iostream>
+#include <vector>
 
 using namespace std;
 using namespace glm;
 
-#define SIZE 100.0f
+#define SIZE 1.0f
 
 const GLfloat points[] = {
+
 	-SIZE, SIZE, -SIZE,
 	-SIZE, -SIZE, -SIZE,
 	SIZE, -SIZE, -SIZE,
 	SIZE, -SIZE, -SIZE,
 	SIZE, SIZE, -SIZE,
 	-SIZE, SIZE, -SIZE,
-
+	
 	-SIZE, -SIZE, SIZE,
 	-SIZE, -SIZE, -SIZE,
 	-SIZE, SIZE, -SIZE,
@@ -64,32 +68,33 @@ SkyBox::SkyBox(GLuint shader_program) {
 SkyBox::~SkyBox() { }
 
 void SkyBox::cubeMapLoad(GLuint *tex) {
-	char 
-		*frontf = "pictures/front.tga", 
-		*backf = "pictures/back.tga", 
-		*bottomf = "pictures/bottom.tga", 
-		*topf = "pictures/top.tga", 
-		*leftf = "pictures/left.tga", 
-		*rightf = "pictures/right.tga";
-
+	vector<char*> filenames;
+	filenames.push_back("pictures/right.tga"),
+	filenames.push_back("pictures/left.tga"),
+		filenames.push_back("pictures/top.tga"),
+		filenames.push_back("pictures/bottom.tga"),
+		filenames.push_back("pictures/front.tga"),
+		filenames.push_back("pictures/back.tga"),
+		
 	glActiveTexture(GL_TEXTURE0);
 	glGenTextures(1, tex);
-	loadCubeFace(*tex, GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, frontf);
-	loadCubeFace(*tex, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, backf);
-	loadCubeFace(*tex, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, topf);
-	loadCubeFace(*tex, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, bottomf);
-	loadCubeFace(*tex, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, leftf);
-	loadCubeFace(*tex, GL_TEXTURE_CUBE_MAP_POSITIVE_X, rightf);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, *tex);
+
+	for (GLuint i = 0; i < filenames.size(); i++) {
+		loadCubeFace(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, filenames[i]);
+	}
 
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
-void SkyBox::loadCubeFace(GLuint tex, GLenum side, char* filename) {
-	glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
+void SkyBox::loadCubeFace(GLenum side, char* filename) {
 	int W, H;
 	unsigned char* data = (unsigned char*)tga_load(filename, &W, &H, TGA_TRUECOLOR_32);
 	
@@ -112,9 +117,6 @@ void SkyBox::draw() {
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glPushMatrix();
-	glTranslatef(0.0f, SIZE, 0.0f);
-
 	glDepthMask(GL_FALSE);
 	glUseProgram(shaderProgram);
 	
@@ -128,7 +130,7 @@ void SkyBox::draw() {
 	
 		glUniformMatrix4fv(projectID, 1, GL_FALSE, &projM[0][0]);
 		glUniformMatrix4fv(modelViewID, 1, GL_FALSE, &viewM[0][0]);
-	
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
 		glBindVertexArray(vao);
