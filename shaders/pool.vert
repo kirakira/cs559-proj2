@@ -22,7 +22,10 @@ void main()
 
 	f_position = final_position;
 	f_normal = normal;
-	ourColor = vec3(.3, .58, 1);
+	if (sin(position.x) > 0)
+		ourColor = vec3(.2, .2, .2);
+	else
+		ourColor = vec3(.4, .2, 1);
 
     gl_Position = projectMatrix * modelViewMatrix * vec4(final_position, 1.0);
 }
