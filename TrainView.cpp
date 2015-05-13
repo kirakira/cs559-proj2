@@ -8,6 +8,7 @@
 #include "GL/gl.h"
 #include "GL/glu.h"
 #include "glm/glm.hpp"
+#include "glm/gtx/transform.hpp"
 #include "ShaderTools.H"
 
 #include "TrainView.H"
@@ -38,8 +39,9 @@
 
 using namespace glm;
 
-TrainView::TrainView(int x, int y, int w, int h, const char* l) : Fl_Gl_Window(x,y,w,h,l)
+TrainView::TrainView(int x, int y, int w, int h, const char* l) : Fl_Gl_Window(x, y, w, h, l)
 	, glewInitialized(false)
+	, sunAngle(0)
 {
 	mode( FL_RGB|FL_ALPHA|FL_DOUBLE | FL_STENCIL );
 
@@ -140,6 +142,11 @@ void TrainView::draw()
 		if (GLEW_OK != err)
 			fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
 
+		char *errMessage;
+		basicShaderProgram = loadShader("shaders/basic.vert", "shaders/basic.frag", errMessage);
+		if (basicShaderProgram == 0)
+			fprintf(stderr, "Error: %s\n", errMessage);
+
 		initGround();
 		initSkyBox();
 		initProjector();
@@ -147,7 +154,12 @@ void TrainView::draw()
 		initTower();
 		initFlag();
 		fireflies = make_unique<Fireflies>(100);
+		initSun();
 	}
+
+	sunPosition = Pnt3f(0, sin(sunAngle) * 150, cos(sunAngle) * 150);
+
+	printf("w = %d\n", w());
 
 	glViewport(0,0,w(),h());
 
@@ -226,28 +238,47 @@ void TrainView::draw()
 	//projector->draw();
 	//billboard->draw();
 
-	Pnt3f light(-100, 100, 100);
-
 	skybox->draw();
 	billboard->draw();
 	projector->draw();
 
-	ground->draw(groundShaderProgram, 0, light, fireflies->getPositions(), false);
+	ground->draw(groundShaderProgram, glm::mat4(), glm::mat4(),
+		0, sunPosition, fireflies->getPositions(), Pnt3f(), false);
 	//glEnable(GL_LIGHTING);
 	
 	setupObjects();
 	
 	// we draw everything twice - once for real, and then once for
 	// shadows
-	drawStuff(light);
+	drawStuff();
 }
 
 bool TrainView::initTower() {
-	tower = RevolutionSurface::generate({ { 0, 10, -1 }, { 0, 9, 1 },
-	{ 0, 6, 80 }, { 0, 10, 85 }, { 0, 0, 100 }, { 0, 0, 120 } });
+	tower = RevolutionSurface::generate({ { 0, 10, -1 }, { 0, 9, 1 }, { 0, 7, 30 }, { 0, 10, 45 }, { 0, 10, 50 },
+	{ 0, 6, 55 }, { 0, 6, 65 },
+	{ 0, 8, 80 }, { 0, 8, 85 }, { 0, 0, 100 }, { 0, 0, 120 } });
 	if (!tower)
 		return false;
-	//tower->modifiedButterfly();
+	tower->modifiedButterfly();
+	return true;
+}
+
+bool TrainView::initSun() {
+	char *err;
+	sunShaderProgram = loadShader("shaders/sun.vert", "shaders/sun.frag", err);
+	if (sunShaderProgram == 0) {
+		cerr << err << endl;
+		return false;
+	}
+	vector<Pnt3f> points;
+	float r = 10;
+	for (float angle = 0; angle <= acos(-1.f); angle += .02)
+		points.emplace_back(0, sin(angle) * r, -cos(angle) * r);
+	points.emplace(points.begin(), 0, -r, -r);
+	points.emplace_back(0, -r, r);
+	sun = RevolutionSurface::generate(std::move(points));
+	if (!sun)
+		return false;
 	return true;
 }
 
@@ -366,7 +397,7 @@ void TrainView::setProjection()
 // (otherwise, you get colored shadows)
 // this gets called twice per draw - once for the objects, once for the shadows
 // TODO if you have other objects in the world, make sure to draw them
-void TrainView::drawStuff(const Pnt3f &light, bool doingShadows)
+void TrainView::drawStuff(bool doingShadows)
 {
 	// draw the control points
 	// don't draw the control points if you're driving 
@@ -403,29 +434,50 @@ void TrainView::drawStuff(const Pnt3f &light, bool doingShadows)
 
 	tw->world.drawItems(doingShadows);
 
-
 	// Tower
 	glPushMatrix();
 	glTranslatef(-80, 0, 80);
 	glRotatef(-90, 1, 0, 0);
-	tower->draw(0, 0, light, fireflies->getPositions(), true);
+	tower->draw(basicShaderProgram, glm::translate(vec3(-80, 0, 80)) * glm::rotate(-90.f, vec3(1, 0, 0)),
+		glm::rotate(-90.f, vec3(1, 0, 0)), 0, sunPosition, fireflies->getPositions(),
+		Pnt3f(.87, .72, .53), false);
 	glPopMatrix();
 
-	// Pool
+	// Flag
 	glPushMatrix();
 	glTranslatef(40, 50, 40);
 	glRotatef(-90, 1, 0, 0);
-	flag->draw(poolShaderProgram, ((float)GetTickCount()) / 1000.f, light, fireflies->getPositions(), false);
-	pole->draw(0, 0, light, fireflies->getPositions(), false);
+	flag->draw(poolShaderProgram, glm::translate(vec3(40, 50, 40)) * glm::rotate(-90.f, vec3(1, 0, 0)),
+		glm::rotate(-90.f, vec3(1, 0, 0)),
+		((float)GetTickCount()) / 1000.f, sunPosition, fireflies->getPositions(), Pnt3f(), false);
+	pole->draw(basicShaderProgram, glm::translate(vec3(40, 50, 40)) * glm::rotate(-90.f, vec3(1, 0, 0)),
+		glm::rotate(-90.f, vec3(1, 0, 0)),
+		0, sunPosition, fireflies->getPositions(), Pnt3f(.54, .27, .07), false);
 	glPopMatrix();
 
 	// Fireflies
 	fireflies->draw();
+
+	// The sun
+	if (sunPosition.y >= 0) {
+		glPushMatrix();
+		glTranslated(sunPosition.x, sunPosition.y, sunPosition.z);
+		sun->draw(sunShaderProgram, glm::translate(glm::vec3(sunPosition.x, sunPosition.y, sunPosition.z)),
+			glm::translate(glm::vec3(sunPosition.x, sunPosition.y, sunPosition.z)),
+			0, sunPosition, fireflies->getPositions(), Pnt3f(1, .45, 0), false);
+		glPopMatrix();
+	}
 }
 
-void TrainView::moveFireflies() {
-	if (glewInitialized)
+void TrainView::tick() {
+	if (glewInitialized) {
 		fireflies->randomMove();
+
+		sunAngle += .02;
+		const float PI = acos(-1.f);
+		if (sunAngle >= PI * 2)
+			sunAngle -= 2 * PI;
+	}
 }
 
 // this tries to see which control point is under the mouse

@@ -1,4 +1,4 @@
-#version 400
+#version 330
 in vec3 ourColor;
 in vec3 f_position;
 in vec3 f_normal;

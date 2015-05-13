@@ -7,6 +7,7 @@
 #include <map>
 #include "Utilities/Pnt3f.h"
 #include "ControlPoint.H"
+#include <glm/matrix.hpp>
 
 struct Vertex {
 	Pnt3f position;
@@ -64,5 +65,7 @@ public:
 	Mesh& operator=(const Mesh &m);
 
 	void modifiedButterfly();
-	void draw(GLuint shader, float time, const Pnt3f &light, const std::vector<Pnt3f> &localLights, bool grid);
+	void draw(GLuint shader, const glm::mat4 &positionModelMatrix, const glm::mat4 &normalModelMatrix,
+		float time, const Pnt3f &light,
+		const std::vector<Pnt3f> &localLights, const Pnt3f &color, bool grid);
 };

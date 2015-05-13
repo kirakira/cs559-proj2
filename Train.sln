@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Train", "Train.vcxproj", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4E773C4F-4504-467F-9218-62160579DF5F}"
 	ProjectSection(SolutionItems) = preProject
+		shaders\basic.frag = shaders\basic.frag
+		shaders\basic.vert = shaders\basic.vert
 		shaders\billboard.frag = shaders\billboard.frag
 		shaders\billboard.vert = shaders\billboard.vert
 		shaders\ground.frag = shaders\ground.frag
@@ -21,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		shaders\pool.vert = shaders\pool.vert
 		shaders\skybox.frag = shaders\skybox.frag
 		shaders\skybox.vert = shaders\skybox.vert
+		shaders\sun.frag = shaders\sun.frag
+		shaders\sun.vert = shaders\sun.vert
 	EndProjectSection
 EndProject
 Global

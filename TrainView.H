@@ -41,15 +41,22 @@ class TrainView : public Fl_Gl_Window
 	std::unique_ptr<Mesh> flag;
 	std::unique_ptr<Mesh> pole;
 	std::unique_ptr<Fireflies> fireflies;
+	std::unique_ptr<Mesh> sun;
 
 	GLuint groundShaderProgram;
 	GLuint poolShaderProgram;
+	GLuint basicShaderProgram;
+	GLuint sunShaderProgram;
+
 	std::unique_ptr<SkyBox> skybox;
 	GLuint skyBoxProgram;
 	std::unique_ptr<Projector> projector;
 	GLuint projectorProgram;
 	std::unique_ptr<BillBoardTree> billboard;
 	GLuint billboardProgram;
+
+	float sunAngle;
+	Pnt3f sunPosition;
 
 public:
 	// note that we keep the "standard widget" constructor arguments
@@ -63,7 +70,7 @@ public:
 	// all of the actual drawing happens in this routine
 	// it has to be encapsulated, since we draw differently if
 	// we're drawing shadows (no colors, for example)
-	void drawStuff(const Pnt3f &light, bool doingShadows=false);
+	void drawStuff(bool doingShadows=false);
 
 	//init shaders for our objects!
 	bool initGround();
@@ -71,6 +78,7 @@ public:
 	bool initProjector();
 	bool initBillBoard();
 	bool initTower();
+	bool initSun();
 	bool initFlag();
 
 	// setup the projection - assuming that the projection stack has been
@@ -81,7 +89,7 @@ public:
 	ArcBallCam arcball;
 	void resetArcball();
 
-	void moveFireflies();
+	void tick();
 
 	// pick a point (for when the mouse goes down)
 	void doPick();
