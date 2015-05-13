@@ -6,16 +6,16 @@
 #include "Projector.h"
 #include "Utilities/libtarga.h"
 
-#define SIZE 50.0f
+#define SIZE 40.0f
 const GLfloat points[] = {
 	
-	-SIZE, 0.0f, -SIZE,
-	-SIZE, 0.0f, SIZE,
-	SIZE, 0.0f, SIZE,
+	-SIZE, 0, 0.0f,
+	-SIZE, 2 * SIZE, 0.0f,
+	SIZE, 2 * SIZE, 0.0f,
 
-	SIZE, 0.0f, SIZE,
-	SIZE, 0.0f, -SIZE,
-	-SIZE, 0.0f, -SIZE,
+	SIZE, 2 * SIZE, 0.0f,
+	SIZE, 0, 0.0f,
+	-SIZE, 0, 0.0f,
 };
 
 const GLfloat point_normals[] = {
@@ -31,6 +31,7 @@ const GLfloat point_normals[] = {
 
 Projector::Projector(GLuint projector_program) {
 	projectorProgram = projector_program;
+	loadTexture(&tex);
 }
 
 Projector::Projector() { }
@@ -55,8 +56,6 @@ void Projector::loadTexture(GLuint *tex) {
 }
 
 void Projector::draw() {
-
-	loadTexture(&tex);
 
 	GLuint vbo[2];
 	glGenBuffers(2, vbo);
@@ -85,8 +84,8 @@ void Projector::draw() {
 
 	glUseProgram(projectorProgram);
 
-	glm::vec3 projPos = glm::vec3(2.0f, 5.0f, 5.0f);
-	glm::vec3 projAt = glm::vec3(-2.0f, -4.0f, 0.0f);
+	glm::vec3 projPos = glm::vec3(100.0f, 200.0f, 200.0f);
+	glm::vec3 projAt = glm::vec3(-2.5f, 42.5f, -3.0f);
 	glm::vec3 projUp = glm::vec3(0.0f, 1.0f, 0.0f);
 	
 	glm::mat4 projView = glm::lookAt(projPos, projAt, projUp);

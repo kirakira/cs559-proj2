@@ -217,7 +217,6 @@ void TrainView::draw()
 		track->setupTrainLight();
 	}*/
 
-	skybox->draw();
 
 	// now draw the ground plane
 	//setupFloor();
@@ -230,9 +229,12 @@ void TrainView::draw()
 	Pnt3f light(-100, 100, 100);
 
 	skybox->draw();
+	billboard->draw();
+	projector->draw();
+
 	ground->draw(groundShaderProgram, 0, light, fireflies->getPositions(), false);
 	//glEnable(GL_LIGHTING);
-
+	
 	setupObjects();
 	
 	// we draw everything twice - once for real, and then once for
@@ -282,7 +284,7 @@ bool TrainView::initFlag() {
 	int n = 28, m = 17;
 	for (int i = 0; i < n; ++i)
 		for (int j = 0; j < m; ++j)
-			controlPoints.emplace_back(i, 0, j);
+			controlPoints.emplace_back((float)i, (float)0, (float)j);
 
 	flag = PatchSurface::generate(&controlPoints[0], n, m, 1);
 	if (!pool)
