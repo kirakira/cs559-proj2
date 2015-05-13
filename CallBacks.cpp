@@ -105,7 +105,7 @@ void runButtonCB(TrainWindow* tw)
 				tw->advanceTrain(tw->world.recordDir);
 			}
 		}
-		tw->trainView->moveFireflies();
+		tw->trainView->tick();
 		tw->damageMe();
 	}
 }
