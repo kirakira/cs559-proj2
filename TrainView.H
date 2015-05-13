@@ -42,6 +42,7 @@ class TrainView : public Fl_Gl_Window
 	std::unique_ptr<Mesh> pole;
 	std::unique_ptr<Fireflies> fireflies;
 	std::unique_ptr<Mesh> sun;
+	std::unique_ptr<Mesh> car;
 
 	GLuint groundShaderProgram;
 	GLuint poolShaderProgram;

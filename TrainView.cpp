@@ -155,11 +155,10 @@ void TrainView::draw()
 		initFlag();
 		fireflies = make_unique<Fireflies>(100);
 		initSun();
+		car = ModelLoader::load("models/face.obj");
 	}
 
 	sunPosition = Pnt3f(0, sin(sunAngle) * 150, cos(sunAngle) * 150);
-
-	printf("w = %d\n", w());
 
 	glViewport(0,0,w(),h());
 
@@ -469,6 +468,10 @@ void TrainView::drawStuff(bool doingShadows)
 			0, sunPosition, sunPosition.y < 0 ? fireflies->getPositions() : vector<Pnt3f>(), Pnt3f(1, .45, 0), false);
 		glPopMatrix();
 	}
+
+	// The car
+	car->draw(basicShaderProgram, glm::mat4(), glm::mat4(), 0, sunPosition,
+		sunPosition.y < 0 ? fireflies->getPositions() : vector<Pnt3f>(), Pnt3f(1, .2, 0), true);
 }
 
 void TrainView::tick() {
