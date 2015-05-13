@@ -9,5 +9,7 @@ out vec3 texcoords;
 
 void main () {
   texcoords = position;
-  gl_Position = Projection * ModelView * vec4(position, 1.0);
+  mat4 View = mat4(ModelView);
+  View[3][0] = 0.0; View[3][1] = 0.0; View[3][2] = 0.0;
+  gl_Position = Projection * View * vec4(position, 1.0);
 }

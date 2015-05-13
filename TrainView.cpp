@@ -5,11 +5,18 @@
 // 
 
 #include "GL/glew.h"
+#include "GL/gl.h"
+#include "GL/glu.h"
+#include "glm/glm.hpp"
+#include "ShaderTools.H"
 
 #include "TrainView.H"
 #include "TrainWindow.H"
 #include "Train.H"
 #include "Track.H"
+#include "Utilities/3DUtils.H"
+
+#include <Fl/fl.h>
 #include "PatchSurface.h"
 #include "Mesh.h"
 #include "Model.h"
@@ -24,15 +31,12 @@
 
 #include <windows.h>
 
-#include "ShaderTools.H"
-#include "GL/gl.h"
-#include "GL/glu.h"
-
+#include "PatchSurface.h"
 #include "SkyBox.h"
+#include "BillBoardTree.h"
+#include "Projector.h"
 
-#ifdef EXAMPLE_SOLUTION
-#include "TrainExample/TrainExample.H"
-#endif
+using namespace glm;
 
 TrainView::TrainView(int x, int y, int w, int h, const char* l) : Fl_Gl_Window(x, y, w, h, l)
 	, glewInitialized(false)
@@ -41,6 +45,8 @@ TrainView::TrainView(int x, int y, int w, int h, const char* l) : Fl_Gl_Window(x
 	mode( FL_RGB|FL_ALPHA|FL_DOUBLE | FL_STENCIL );
 
 	resetArcball();
+
+	viewMatrix = mat4(0.0f);
 }
 
 TrainView::~TrainView() {
@@ -142,6 +148,8 @@ void TrainView::draw()
 
 		initGround();
 		initSkyBox();
+		initProjector();
+		initBillBoard();
 		initTower();
 		initFlag();
 		fireflies = make_unique<Fireflies>(100);
@@ -154,14 +162,16 @@ void TrainView::draw()
 
 	glViewport(0,0,w(),h());
 
+	glGetFloatv(GL_MODELVIEW_MATRIX, &viewMatrix[0][0]);
+
 	// clear the window, be sure to clear the Z-Buffer too
 	
-	//glClearColor(0,0,.3f,0);		// background should be blue
+	glClearColor(0,0,0,0);		// background should be blue
 	// we need to clear out the stencil buffer since we'll use
 	// it for shadows
 	glClearStencil(0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	
+
 	glEnable(GL_DEPTH);
 
 	// Blayne prefers GL_DIFFUSE
@@ -218,13 +228,20 @@ void TrainView::draw()
 		track->setupTrainLight();
 	}*/
 
+	skybox->draw();
+
 	// now draw the ground plane
 	//setupFloor();
 	//glDisable(GL_LIGHTING);
+//ground->draw();
+
+	//projector->draw();
+	//billboard->draw();
 
 	skybox->draw();
 	ground->draw(groundShaderProgram, 0, sunPosition, fireflies->getPositions(), Pnt3f(), false);
 	//glEnable(GL_LIGHTING);
+
 	setupObjects();
 	
 	// we draw everything twice - once for real, and then once for
@@ -316,6 +333,29 @@ bool TrainView::initSkyBox() {
 	skybox = make_unique<SkyBox>(skyBoxProgram);
 	return true;
 }
+
+bool TrainView::initBillBoard() {
+	char *err;
+	billboardProgram = loadShader("shaders/billboard.vert", "shaders/billboard.frag", err);
+	if (billboardProgram == 0) {
+		printf(err);
+		return false;
+	}
+	billboard = make_unique<BillBoardTree>(billboardProgram);
+	return true;
+}
+
+bool TrainView::initProjector() {
+	char *err;
+	projectorProgram = loadShader("shaders/projector.vert", "shaders/projector.frag", err);
+	if (projectorProgram == 0) {
+		printf(err);
+		return false;
+	}
+	projector = make_unique<Projector>(projectorProgram);
+	return true;
+}
+
 
 // note: this sets up both the Projection and the ModelView matrices
 // HOWEVER: it doesn't clear the projection first (the caller handles
@@ -477,4 +517,53 @@ void TrainView::doPick()
 		selectedCube = -1;
 
 	printf("Selected Cube %d\n",selectedCube);
+}
+
+void TrainView::setViewMatrix() {
+	glGetFloatv(GL_MODELVIEW_MATRIX, &viewMatrix[0][0]);
+}
+glm::mat4 TrainView::getViewMatrix() {
+	return mat4(viewMatrix);
+}
+
+glm::mat4 TrainView::getModelMatrix() {
+	mat4 ret = mat4(0.0f);
+	glGetFloatv(GL_MODELVIEW_MATRIX, &ret[0][0]);
+	ret = glm::inverse(getViewMatrix()) * ret;
+	return ret;
+}
+
+/*
+The normal matrix is typically the inverse transpose of the upper-left 3x3
+portion of the model-view matrix. We use the inverse transpose because
+normal vectors transform differently than the vertex position. For a more
+thorough discussion of the normal matrix, and the reasons why, see any
+introductory computer graphics textbook. (A good choice would be Computer
+Graphics with OpenGL by Hearn and Baker.) If your model-view matrix does
+not include any non-uniform scalings, then one can use the upper-left 3x3 of
+the model-view matrix in place of the normal matrix to transform your normal
+vectors. However, if your model-view matrix does include (uniform) scalings,
+you'll still need to (re)normalize your normal vectors after transforming them.
+*/
+glm::mat4 TrainView::getNormalMatrix() {
+	glm::mat4 modelView = getModelViewMatrix();
+	glm::mat4 ret = glm::transpose(modelView);
+	ret = glm::inverse(modelView);
+	return ret;
+}
+
+glm::mat4 TrainView::getModelViewMatrix() {
+	glm::mat4 ret = mat4(0.0f);
+	glGetFloatv(GL_MODELVIEW_MATRIX, &ret[0][0]);
+	return ret;
+}
+glm::mat4 TrainView::getProjectionMatrix() {
+	glm::mat4 ret = mat4(0.0f);
+	glGetFloatv(GL_PROJECTION_MATRIX, &ret[0][0]);
+	return ret;
+}
+
+void TrainView::bindUniformMatrix(GLuint shader, const char* name, GLfloat *value) {
+	int location = glGetUniformLocation(shader, name);
+	glUniformMatrix4fv(location, 1, GL_FALSE, value);
 }

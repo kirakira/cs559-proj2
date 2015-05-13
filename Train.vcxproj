@@ -94,6 +94,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BillBoardTree.cpp" />
     <ClCompile Include="CallBacks.cpp" />
     <ClCompile Include="ControlPoint.cpp" />
     <ClCompile Include="CurvePiece.cpp" />
@@ -103,6 +104,7 @@
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="PatchSurface.cpp" />
+    <ClCompile Include="Projector.cpp" />
     <ClCompile Include="RevolutionSurface.cpp" />
     <ClCompile Include="ShaderTools.cpp" />
     <ClCompile Include="SkyBox.cpp" />
@@ -117,6 +119,7 @@
     <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BillBoardTree.h" />
     <ClInclude Include="CallBacks.H" />
     <ClInclude Include="ControlPoint.H" />
     <ClInclude Include="CurvePiece.h" />
@@ -125,6 +128,7 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="PatchSurface.h" />
+    <ClInclude Include="Projector.h" />
     <ClInclude Include="RevolutionSurface.h" />
     <ClInclude Include="ShaderTools.H" />
     <ClInclude Include="SkyBox.h" />

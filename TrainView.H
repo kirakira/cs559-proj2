@@ -1,18 +1,7 @@
 #pragma once
-// CS559 Train Project
-// TrainView class definition
-//
-// The TrainView is the window that actually shows the train. Its a
-// GL display canvas (Fl_Gl_Window).  It is held within a TrainWindow
-// that is the outer window with all the widgets. The TrainView needs 
-// to be aware of the window - since it might need to check the widgets 
-// to see how to draw
 
-// we need to have pointers to this, but maybe not know about it
-// (beware circular references)
-//
-// written October 2008, by Mike Gleicher
-//
+#include "glm/glm.hpp"
+
 class TrainWindow;
 class World;
 class Train;
@@ -36,6 +25,8 @@ class Track;
 // this uses the old ArcBall Code
 #include "Utilities/ArcBallCam.H"
 #include "SkyBox.h"
+#include "Projector.h"
+#include "BillBoardTree.h"
 #include "Mesh.h"
 #include <memory>
 #include "Fireflies.h"
@@ -59,6 +50,10 @@ class TrainView : public Fl_Gl_Window
 
 	std::unique_ptr<SkyBox> skybox;
 	GLuint skyBoxProgram;
+	std::unique_ptr<Projector> projector;
+	GLuint projectorProgram;
+	std::unique_ptr<BillBoardTree> billboard;
+	GLuint billboardProgram;
 
 	float sunAngle;
 	Pnt3f sunPosition;
@@ -80,6 +75,8 @@ public:
 	//init shaders for our objects!
 	bool initGround();
 	bool initSkyBox();
+	bool initProjector();
+	bool initBillBoard();
 	bool initTower();
 	bool initSun();
 	bool initFlag();
@@ -105,4 +102,15 @@ public:
 
 	Train* train;
 	Track* track;
+
+	glm::mat4 viewMatrix;
+
+	void setViewMatrix();
+	glm::mat4 getViewMatrix();
+	glm::mat4 getModelMatrix();
+	static glm::mat4 getNormalMatrix();
+	static glm::mat4 getModelViewMatrix();
+	static glm::mat4 getProjectionMatrix();
+
+	static void bindUniformMatrix(GLuint shader, const char* name, GLfloat *value);
 };

@@ -11,7 +11,7 @@ public:
 	void draw();
 	
 	void cubeMapLoad(GLuint* tex);
-	void loadCubeFace(GLuint tex, GLenum side, char* filename);
+	void loadCubeFace(GLenum side, char* filename);
 
 private:
 	GLuint shaderProgram;
